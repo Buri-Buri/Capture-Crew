@@ -18,7 +18,7 @@ async function seedData() {
             // Check if user exists
             const [existing] = await db.query('SELECT * FROM users WHERE email = ?', [provider.email]);
             if (existing.length === 0) {
-                await db.query('INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)',
+                await db.query('INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
                     [provider.username, provider.email, password, provider.role]);
                 console.log(`Created user: ${provider.username}`);
             } else {

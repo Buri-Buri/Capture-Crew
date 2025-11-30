@@ -1,23 +1,45 @@
-const db = require('../config/db');
+const supabase = require('../config/supabase');
 
 const User = {
     findByEmail: async (email) => {
-        const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-        return rows[0];
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found"
+            console.error('Supabase findByEmail error:', error);
+        }
+        return data;
     },
 
     create: async (userData) => {
         const { username, email, password_hash, role } = userData;
-        const [result] = await db.query(
-            'INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
-            [username, email, password_hash, role || 'customer']
-        );
-        return result.insertId;
+        const { data, error } = await supabase
+            .from('users')
+            .insert([{ username, email, password_hash, role: role || 'customer' }])
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Supabase create user error:', error);
+            throw error;
+        }
+        return data.id;
     },
 
     findById: async (id) => {
-        const [rows] = await db.query('SELECT id, username, email, role, created_at FROM users WHERE id = ?', [id]);
-        return rows[0];
+        const { data, error } = await supabase
+            .from('users')
+            .select('id, username, email, role, created_at')
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            console.error('Supabase findById error:', error);
+        }
+        return data;
     }
 };
 

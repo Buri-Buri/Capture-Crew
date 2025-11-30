@@ -1,5 +1,5 @@
 const express = require('express');
-const { createBooking, getUserBookings, getSellerBookings, updateBookingStatus } = require('../controllers/bookingController');
+const { createBooking, getUserBookings, getSellerBookings, updateBookingStatus, updatePaymentStatus, completeBooking } = require('../controllers/bookingController');
 const verifyToken = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -18,5 +18,7 @@ router.post('/', verifyToken, createBooking);
 router.get('/my-bookings', verifyToken, getUserBookings);
 router.get('/seller-bookings', verifyToken, getSellerBookings);
 router.put('/:id/status', verifyToken, updateBookingStatus);
+router.put('/:id/payment', verifyToken, updatePaymentStatus);
+router.put('/:id/complete', verifyToken, completeBooking);
 
 module.exports = router;

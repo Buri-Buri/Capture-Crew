@@ -8,7 +8,7 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
 -   **Detailed Profiles**: View comprehensive service details, including pricing, descriptions, and portfolio images.
 -   **Booking System**: Seamless booking flow with date selection and status tracking (Pending, Accepted, Rejected).
 -   **User Accounts**:
-    -   **Google OAuth2**: Fast and secure sign-up/login with Google.
+    -   **Secure Authentication**: Email/Password login via Supabase.
     -   **Role-Based Access**: Separate dashboards for Customers (hire professionals) and Sellers (offer services).
     -   **Profile Management**: Upload profile pictures and manage account details.
 -   **Seller Dashboard**: Manage services, view active bookings, and update booking statuses.
@@ -18,15 +18,14 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
 
 -   **Frontend**: React, Vite, React Router, Vanilla CSS (OKLCH variables).
 -   **Backend**: Node.js, Express.js.
--   **Database**: MySQL.
--   **Authentication**: JWT (JSON Web Tokens), Google OAuth2.
+-   **Database**: Supabase (PostgreSQL).
+-   **Authentication**: Custom JWT with Supabase.
 -   **File Storage**: Local storage (uploads directory) with Multer.
 
 ## Prerequisites
 
 -   Node.js (v14 or higher)
--   MySQL Server
--   Google Cloud Console Project (for OAuth)
+-   Supabase Project
 
 ## Installation
 
@@ -44,12 +43,9 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
     -   Create a `.env` file in the `backend` directory:
         ```env
         PORT=5000
-        DB_HOST=localhost
-        DB_USER=root
-        DB_PASSWORD=your_mysql_password
-        DB_NAME=capturecrew
+        SUPABASE_URL=your_supabase_url
+        SUPABASE_KEY=your_supabase_anon_key
         JWT_SECRET=your_jwt_secret
-        GOOGLE_CLIENT_ID=your_google_client_id
         ```
     -   Start the server:
         ```bash
@@ -61,10 +57,6 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
     cd frontend
     npm install
     ```
-    -   Create a `.env` file in the `frontend` directory:
-        ```env
-        VITE_GOOGLE_CLIENT_ID=your_google_client_id
-        ```
     -   Start the development server:
         ```bash
         npm run dev
@@ -72,7 +64,14 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
 
 ## Database Setup
 
-The application expects a MySQL database named `capturecrew`. The tables (`users`, `services`, `bookings`, etc.) will be created automatically or via migration scripts provided in the `backend` folder.
+The application uses Supabase. Ensure your Supabase project has the following tables:
+- `users`
+- `services`
+- `bookings`
+- `messages`
+- `service_images`
+
+You can find the schema definition in `database/schema.sql`.
 
 ## Usage
 
@@ -85,3 +84,4 @@ The application expects a MySQL database named `capturecrew`. The tables (`users
 ## License
 
 This project is licensed under the MIT License.
+
