@@ -84,6 +84,7 @@ const ServiceDetails = () => {
                         <div style={{ textAlign: 'right' }}>
                             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--primary)' }}>${service.price}</div>
                             <div style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>per event</div>
+                            <button onClick={() => navigate('/messages', { state: { sellerId: service.seller_id, sellerName: service.seller_name, sellerImage: service.seller_image } })} className="btn btn-outline" style={{ marginTop: '0.5rem', fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>Message Seller</button>
                         </div>
                     </div>
 

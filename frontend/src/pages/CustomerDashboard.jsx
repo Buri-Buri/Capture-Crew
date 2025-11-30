@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getMyBookings } from '../utils/api';
 
 const CustomerDashboard = () => {
+    const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const [bookings, setBookings] = useState([]);
 
@@ -50,6 +51,7 @@ const CustomerDashboard = () => {
                                 <h4>{booking.service_title}</h4>
                                 <p>Date: {new Date(booking.booking_date).toLocaleDateString()}</p>
                                 <p>Status: <span style={{ color: booking.status === 'pending' ? '#fbbf24' : '#10b981' }}>{booking.status}</span></p>
+                                <button onClick={() => navigate('/messages', { state: { sellerId: booking.seller_id, sellerName: booking.seller_name } })} className="btn btn-outline" style={{ marginTop: '0.5rem', width: '100%' }}>Message Seller</button>
                             </div>
                         ))}
                     </div>

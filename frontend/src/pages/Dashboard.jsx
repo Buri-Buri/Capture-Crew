@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { createService, getMyServices, getSellerBookings, updateBookingStatus } from '../utils/api';
+import { createService, getMyServices, getSellerBookings, updateBookingStatus, completeBooking, updatePaymentStatus } from '../utils/api';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
+    const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const token = localStorage.getItem('token');
     const [showModal, setShowModal] = useState(false);
@@ -55,6 +57,32 @@ const Dashboard = () => {
         } catch (error) {
             console.error('Error updating status:', error);
             alert('Error updating status');
+        }
+    };
+
+    const handleComplete = async (bookingId) => {
+        if (!window.confirm('Are you sure you want to mark this booking as completed?')) return;
+        try {
+            const res = await completeBooking(bookingId);
+            if (res.message) {
+                alert('Booking completed!');
+                fetchBookings();
+            }
+        } catch (error) {
+            console.error('Error completing booking:', error);
+        }
+    };
+
+    const handlePayment = async (bookingId, status) => {
+        if (!window.confirm(`Mark this booking as ${status}?`)) return;
+        try {
+            const res = await updatePaymentStatus(bookingId, status);
+            if (res.message) {
+                alert('Payment status updated!');
+                fetchBookings();
+            }
+        } catch (error) {
+            console.error('Error updating payment:', error);
         }
     };
 
@@ -187,10 +215,24 @@ const Dashboard = () => {
                                 <p>Contact: {booking.contact_info || 'N/A'}</p>
                                 <p>Location: {booking.location || 'N/A'}</p>
                                 <p>Status: <span style={{ color: booking.status === 'pending' ? '#fbbf24' : booking.status === 'accepted' ? '#10b981' : '#ef4444' }}>{booking.status}</span></p>
+
                                 {booking.status === 'pending' && (
-                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                         <button onClick={() => handleStatusUpdate(booking.id, 'accepted')} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Accept</button>
                                         <button onClick={() => handleStatusUpdate(booking.id, 'rejected')} className="btn btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', borderColor: '#ef4444', color: '#ef4444' }}>Reject</button>
+                                        <button onClick={() => navigate('/messages', { state: { sellerId: booking.customer_id, sellerName: booking.customer_name } })} className="btn btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Message Buyer</button>
+                                    </div>
+                                )}
+
+                                {booking.status === 'accepted' && (
+                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        {!booking.is_completed && (
+                                            <button onClick={() => handleComplete(booking.id)} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', background: '#10b981', borderColor: '#10b981' }}>Complete Booking</button>
+                                        )}
+                                        {booking.is_completed && booking.payment_status === 'pending' && (
+                                            <button onClick={() => handlePayment(booking.id, 'paid')} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', background: '#f59e0b', borderColor: '#f59e0b' }}>Mark Paid</button>
+                                        )}
+                                        <button onClick={() => navigate('/messages', { state: { sellerId: booking.customer_id, sellerName: booking.customer_name } })} className="btn btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Message Buyer</button>
                                     </div>
                                 )}
                             </div>
@@ -231,50 +273,52 @@ const Dashboard = () => {
                 )}
             </div>
 
-            {showModal && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000
-                }}>
-                    <div className="card" style={{ width: '100%', maxWidth: '500px', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
-                        <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
-                        <h3 style={{ marginBottom: '1.5rem' }}>Add New Service</h3>
-                        <form onSubmit={handleSubmit}>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Service Title</label>
-                                <input type="text" name="title" value={formData.title} onChange={handleChange} required style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
-                            </div>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Category</label>
-                                <select name="category" value={formData.category} onChange={handleChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }}>
-                                    <option>Photography</option>
-                                    <option>Videography</option>
-                                    <option>Event Planning</option>
-                                    <option>Decoration</option>
-                                </select>
-                            </div>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Price ($)</label>
-                                <input type="number" name="price" value={formData.price} onChange={handleChange} required style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
-                            </div>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Description</label>
-                                <textarea name="description" value={formData.description} onChange={handleChange} rows="3" style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }}></textarea>
-                            </div>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Portfolio Images (Upload)</label>
-                                <input type="file" accept="image/*" multiple onChange={handleFileChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
-                            </div>
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Image Links (Comma separated)</label>
-                                <input type="text" value={imageLinks} onChange={(e) => setImageLinks(e.target.value)} placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg" style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
-                            </div>
-                            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Create Service</button>
-                        </form>
+            {
+                showModal && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                        backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000
+                    }}>
+                        <div className="card" style={{ width: '100%', maxWidth: '500px', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
+                            <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                            <h3 style={{ marginBottom: '1.5rem' }}>Add New Service</h3>
+                            <form onSubmit={handleSubmit}>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Service Title</label>
+                                    <input type="text" name="title" value={formData.title} onChange={handleChange} required style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
+                                </div>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Category</label>
+                                    <select name="category" value={formData.category} onChange={handleChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }}>
+                                        <option>Photography</option>
+                                        <option>Videography</option>
+                                        <option>Event Planning</option>
+                                        <option>Decoration</option>
+                                    </select>
+                                </div>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Price ($)</label>
+                                    <input type="number" name="price" value={formData.price} onChange={handleChange} required style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
+                                </div>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Description</label>
+                                    <textarea name="description" value={formData.description} onChange={handleChange} rows="3" style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }}></textarea>
+                                </div>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Portfolio Images (Upload)</label>
+                                    <input type="file" accept="image/*" multiple onChange={handleFileChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
+                                </div>
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Image Links (Comma separated)</label>
+                                    <input type="text" value={imageLinks} onChange={(e) => setImageLinks(e.target.value)} placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg" style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
+                                </div>
+                                <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Create Service</button>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

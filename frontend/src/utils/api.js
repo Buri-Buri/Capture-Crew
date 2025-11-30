@@ -95,3 +95,55 @@ export const updateBookingStatus = async (bookingId, status) => {
     });
     return response.json();
 };
+export const sendMessage = async (data) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/messages`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+    });
+    return res.json();
+};
+
+export const getConversations = async () => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/messages/conversations`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+};
+
+export const getMessages = async (userId) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/messages/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+};
+
+export const updatePaymentStatus = async (bookingId, status) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/bookings/${bookingId}/payment`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ payment_status: status })
+    });
+    return res.json();
+};
+
+export const completeBooking = async (bookingId) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/bookings/${bookingId}/complete`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    return res.json();
+};
