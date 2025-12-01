@@ -204,7 +204,7 @@ const completeBooking = async (req, res) => {
 
         const { error: updateError } = await supabase
             .from('bookings')
-            .update({ is_completed: true, status: 'completed' })
+            .update({ is_completed: true })
             .eq('id', id);
 
         if (updateError) throw updateError;
@@ -212,7 +212,9 @@ const completeBooking = async (req, res) => {
         res.json({ message: 'Booking marked as completed' });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        const fs = require('fs');
+        fs.appendFileSync('debug_error.txt', JSON.stringify(error) + '\n');
+        res.status(500).json({ message: 'Server error: ' + error.message, details: error });
     }
 };
 

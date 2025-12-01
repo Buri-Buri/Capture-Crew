@@ -64,9 +64,11 @@ const Dashboard = () => {
         if (!window.confirm('Are you sure you want to mark this booking as completed?')) return;
         try {
             const res = await completeBooking(bookingId);
-            if (res.message) {
+            if (res.message === 'Booking marked as completed') {
                 alert('Booking completed!');
                 fetchBookings();
+            } else {
+                alert('Failed to complete booking: ' + (res.message || 'Unknown error'));
             }
         } catch (error) {
             console.error('Error completing booking:', error);

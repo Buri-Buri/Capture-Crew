@@ -53,9 +53,12 @@ export const getMyServices = async () => {
     return response.json();
 };
 
-export const getAllServices = async () => {
-    console.log('Fetching services from:', `${API_URL}/services`);
-    const response = await fetch(`${API_URL}/services`, {
+export const getAllServices = async (search = '') => {
+    const url = search
+        ? `${API_URL}/services?search=${encodeURIComponent(search)}`
+        : `${API_URL}/services`;
+    console.log('Fetching services from:', url);
+    const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
     });

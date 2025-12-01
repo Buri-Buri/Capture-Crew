@@ -50,7 +50,14 @@ const CustomerDashboard = () => {
                             <div key={booking.id} className="card">
                                 <h4>{booking.service_title}</h4>
                                 <p>Date: {new Date(booking.booking_date).toLocaleDateString()}</p>
-                                <p>Status: <span style={{ color: booking.status === 'pending' ? '#fbbf24' : '#10b981' }}>{booking.status}</span></p>
+                                <p>Status: <span style={{
+                                    color: booking.is_completed ? '#10b981' :
+                                        booking.status === 'rejected' ? '#ef4444' :
+                                            booking.status === 'accepted' ? '#10b981' : '#fbbf24',
+                                    fontWeight: 'bold'
+                                }}>
+                                    {booking.is_completed ? 'Completed' : booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                </span></p>
                                 <button onClick={() => navigate('/messages', { state: { sellerId: booking.seller_id, sellerName: booking.seller_name } })} className="btn btn-outline" style={{ marginTop: '0.5rem', width: '100%' }}>Message Seller</button>
                             </div>
                         ))}

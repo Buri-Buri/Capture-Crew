@@ -101,7 +101,7 @@ const getAllServices = async (req, res) => {
     try {
         // Fetch services with seller details
         // Note: Assuming 'users' table is public or accessible via RLS
-        const { data: services, error: servicesError } = await supabase
+        let query = supabase
             .from('services')
             .select(`
                 *,
@@ -111,6 +111,13 @@ const getAllServices = async (req, res) => {
                 )
             `)
             .order('created_at', { ascending: false });
+
+        if (req.query.search) {
+            const searchTerm = req.query.search;
+            query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`);
+        }
+
+        const { data: services, error: servicesError } = await query;
 
         if (servicesError) throw servicesError;
 

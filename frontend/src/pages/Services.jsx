@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getAllServices, createBooking } from '../utils/api';
 import BookingModal from '../components/BookingModal';
 
@@ -7,13 +8,17 @@ const Services = () => {
     const [selectedServiceId, setSelectedServiceId] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        fetchServices();
-    }, []);
+    const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
+    const searchTerm = searchParams.get('search');
 
-    const fetchServices = async () => {
+    useEffect(() => {
+        fetchServices(searchTerm);
+    }, [searchTerm]);
+
+    const fetchServices = async (search = '') => {
         try {
-            const data = await getAllServices();
+            const data = await getAllServices(search);
             if (Array.isArray(data)) {
                 setServices(data);
             }

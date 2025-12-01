@@ -90,7 +90,7 @@ const Messages = () => {
     };
 
     return (
-        <div className="container" style={{ paddingTop: '2rem', height: 'calc(100vh - 80px)', display: 'flex', gap: '1rem' }}>
+        <div className="container" style={{ paddingTop: '100px', paddingBottom: '2rem', height: '100vh', overflow: 'hidden', display: 'flex', gap: '1rem' }}>
             {/* Sidebar */}
             <div className="card" style={{ width: '300px', padding: '0', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>
