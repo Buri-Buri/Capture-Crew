@@ -7,14 +7,21 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
 -   **Service Discovery**: Browse and search for professionals by category (Photography, Videography, Event Planning) and price.
 -   **Detailed Profiles**: View comprehensive service details, including pricing, descriptions, and portfolio images.
 -   **Booking System**: Seamless booking flow with date selection and status tracking (Pending, Accepted, Rejected).
+-   **Reviews & Ratings**: Customers can leave reviews and ratings for services they've booked.
 -   **User Accounts**:
     -   **Secure Authentication**: Email/Password login via Supabase.
-    -   **Role-Based Access**: Separate dashboards for Customers (hire professionals) and Sellers (offer services).
+    -   **Role-Based Access**:
+        -   **Customers**: Book services, leave reviews, view booking history.
+        -   **Sellers**: Create services, manage bookings, view earnings reports.
+        -   **Restrictions**: Sellers cannot book services or message other sellers.
     -   **Profile Management**: Upload profile pictures and manage account details.
 -   **Real-time Messaging**: Chat directly with professionals or clients to discuss booking details.
 -   **Profile Page**: Dedicated profile view with personal information, bio, and experience details.
--   **Seller Dashboard**: Manage services, view active bookings, track earnings, and update booking statuses (Accepted, Completed, Paid).
--   **Modern UI**: Responsive design with a custom OKLCH color palette and dark mode support.
+-   **Seller Dashboard**:
+    -   **Service Management**: Add, edit, and delete portfolio images.
+    -   **Booking Management**: Accept/Reject bookings, mark as Completed/Paid.
+    -   **Reports**: View detailed earnings reports and analytics.
+-   **Modern UI**: Responsive design with a custom OKLCH color palette, dark mode support, and interactive elements.
 
 ## Tech Stack
 
@@ -22,7 +29,7 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
 -   **Backend**: Node.js, Express.js.
 -   **Database**: Supabase (PostgreSQL).
 -   **Authentication**: Custom JWT with Supabase.
--   **File Storage**: Local storage (uploads directory) with Multer.
+-   **File Storage**: Supabase Storage (for profile pictures and portfolio images).
 
 ## Prerequisites
 
