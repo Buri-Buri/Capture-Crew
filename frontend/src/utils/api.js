@@ -39,10 +39,7 @@ export const createService = async (serviceData) => {
         },
         body: serviceData,
     });
-    console.log('Response status:', response.status);
-    const text = await response.text();
-    console.log('Response text:', text);
-    return JSON.parse(text);
+    return response.json();
 };
 
 export const getMyServices = async () => {
@@ -57,7 +54,6 @@ export const getAllServices = async (search = '') => {
     const url = search
         ? `${API_URL}/services?search=${encodeURIComponent(search)}`
         : `${API_URL}/services`;
-    console.log('Fetching services from:', url);
     const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -98,6 +94,7 @@ export const updateBookingStatus = async (bookingId, status) => {
     });
     return response.json();
 };
+
 export const sendMessage = async (data) => {
     const token = localStorage.getItem('token');
     const res = await fetch(`${API_URL}/messages`, {
@@ -159,14 +156,42 @@ export const getUserProfile = async () => {
     return response.json();
 };
 
-export const updateUserProfile = async (formData) => {
+export const updateUserProfile = async (userData) => {
     const token = localStorage.getItem('token');
     const response = await fetch(`${API_URL}/users/profile`, {
         method: 'PUT',
         headers: {
             'Authorization': `Bearer ${token}`
         },
-        body: formData
+        body: userData // FormData
     });
     return response.json();
+};
+
+export const addReview = async (reviewData) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/reviews`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(reviewData)
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        try {
+            const json = JSON.parse(text);
+            return json; // Return error object from backend
+        } catch (e) {
+            throw new Error(`Server error: ${res.status} ${res.statusText}`);
+        }
+    }
+    return res.json();
+};
+
+export const getServiceReviews = async (serviceId) => {
+    const res = await fetch(`${API_URL}/reviews/service/${serviceId}`);
+    return res.json();
 };

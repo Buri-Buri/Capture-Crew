@@ -110,6 +110,11 @@ const getAllServices = async (req, res) => {
                 users (
                     username,
                     profile_picture
+                ),
+                bookings (
+                    reviews (
+                        rating
+                    )
                 )
             `)
             .order('created_at', { ascending: false });
@@ -131,19 +136,39 @@ const getAllServices = async (req, res) => {
                 .select('image_url')
                 .eq('service_id', service.id);
 
+            // Calculate ratings
+            let totalRating = 0;
+            let reviewCount = 0;
+
+            if (service.bookings) {
+                service.bookings.forEach(booking => {
+                    if (booking.reviews && booking.reviews.length > 0) {
+                        booking.reviews.forEach(review => {
+                            totalRating += review.rating;
+                            reviewCount++;
+                        });
+                    }
+                });
+            }
+
+            const averageRating = reviewCount > 0 ? (totalRating / reviewCount).toFixed(1) : 0;
+
             const serviceObj = {
                 ...service,
                 seller_name: service.users?.username,
                 seller_image: service.users?.profile_picture,
-                images: images ? images.map(img => img.image_url) : []
+                images: images ? images.map(img => img.image_url) : [],
+                average_rating: averageRating,
+                total_reviews: reviewCount
             };
 
             if (!serviceObj.image_url && serviceObj.images.length > 0) {
                 serviceObj.image_url = serviceObj.images[0];
             }
 
-            // Remove the nested users object
+            // Remove the nested users and bookings objects
             delete serviceObj.users;
+            delete serviceObj.bookings;
             formattedServices.push(serviceObj);
         }
 

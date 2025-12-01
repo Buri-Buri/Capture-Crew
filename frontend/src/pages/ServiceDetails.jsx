@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getAllServices, createBooking } from '../utils/api';
+import { getAllServices, createBooking, getServiceReviews } from '../utils/api';
 
 const ServiceDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [service, setService] = useState(null);
+    const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showBooking, setShowBooking] = useState(false);
     const [bookingData, setBookingData] = useState({
@@ -15,37 +16,59 @@ const ServiceDetails = () => {
     });
 
     useEffect(() => {
-        const fetchService = async () => {
-            try {
-                const services = await getAllServices();
-                const found = services.find(s => s.id === parseInt(id));
-                setService(found);
-            } catch (error) {
-                console.error('Error fetching service:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchService();
+        fetchServiceDetails();
     }, [id]);
+
+    const fetchServiceDetails = async () => {
+        try {
+            const services = await getAllServices();
+            const foundService = services.find(s => s.id === parseInt(id));
+            setService(foundService);
+
+            // Fetch reviews
+            const reviewsData = await getServiceReviews(id);
+            if (Array.isArray(reviewsData)) {
+                setReviews(reviewsData);
+            }
+        } catch (error) {
+            console.error('Error fetching service details:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleBookingSubmit = async (e) => {
         e.preventDefault();
+        if (!localStorage.getItem('token')) {
+            alert('Please login to book a service');
+            navigate('/login');
+            return;
+        }
+
         try {
-            await createBooking({
+            const res = await createBooking({
                 service_id: service.id,
                 ...bookingData
             });
-            alert('Booking request sent successfully!');
-            setShowBooking(false);
+            if (res.bookingId) {
+                alert('Booking request sent successfully!');
+                setShowBooking(false);
+                navigate('/customer-dashboard');
+            } else {
+                alert('Failed to book service');
+            }
         } catch (error) {
-            console.error('Booking failed:', error);
-            alert('Failed to book service. Please try again.');
+            console.error('Error booking service:', error);
+            alert('Error booking service');
         }
     };
 
     if (loading) return <div className="container" style={{ paddingTop: '2rem' }}>Loading...</div>;
     if (!service) return <div className="container" style={{ paddingTop: '2rem' }}>Service not found</div>;
+
+    const averageRating = reviews.length > 0
+        ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+        : 'New';
 
     return (
         <div className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
@@ -53,10 +76,10 @@ const ServiceDetails = () => {
 
             <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
                 <div style={{ height: '400px', background: 'var(--muted)', position: 'relative' }}>
-                    {service.image_url ? (
-                        <img src={service.image_url} alt={service.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {service.images && service.images.length > 0 ? (
+                        <img src={service.images[0]} alt={service.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted-foreground)' }}>No Image</div>
+                        <img src={service.image_url || 'https://via.placeholder.com/600x400'} alt={service.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     )}
                 </div>
 
@@ -79,6 +102,9 @@ const ServiceDetails = () => {
                                 <span>{service.category}</span>
                                 <span>•</span>
                                 <span>{service.location}</span>
+                                <span style={{ background: '#fbbf24', color: 'black', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', fontWeight: 'bold', marginLeft: '1rem' }}>
+                                    ★ {averageRating} ({reviews.length} reviews)
+                                </span>
                             </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
@@ -106,6 +132,37 @@ const ServiceDetails = () => {
 
                     <button onClick={() => setShowBooking(true)} className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.125rem' }}>Book Now</button>
                 </div>
+            </div>
+
+            <div style={{ marginTop: '3rem' }}>
+                <h3>Reviews</h3>
+                {reviews.length > 0 ? (
+                    <div className="grid" style={{ marginTop: '1rem' }}>
+                        {reviews.map((review) => (
+                            <div key={review.id} className="card">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                            {review.user?.profile_picture ? (
+                                                <img src={review.user.profile_picture} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <span>{review.user?.username?.charAt(0).toUpperCase() || 'U'}</span>
+                                            )}
+                                        </div>
+                                        <span style={{ fontWeight: 'bold' }}>{review.user?.username || 'Anonymous'}</span>
+                                    </div>
+                                    <span style={{ color: '#fbbf24' }}>{'★'.repeat(review.rating)}</span>
+                                </div>
+                                <p>{review.comment}</p>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)', marginTop: '0.5rem' }}>
+                                    {new Date(review.created_at).toLocaleDateString()}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p style={{ color: 'var(--muted-foreground)', marginTop: '1rem' }}>No reviews yet.</p>
+                )}
             </div>
 
             {showBooking && (

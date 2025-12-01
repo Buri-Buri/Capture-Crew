@@ -145,30 +145,50 @@ const Home = () => {
 
                     <div className="grid">
                         {services.length > 0 ? services.map((service) => (
-                            <Link to={`/service/${service.id}`} className="pro-card" key={service.id} style={{ textDecoration: 'none', display: 'block' }}>
-                                <div className="pro-avatar">
-                                    {service.seller_image ? (
-                                        <img src={service.seller_image} alt={service.seller_name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                            <Link to={`/service/${service.id}`} className="pro-card" key={service.id} style={{ textDecoration: 'none', display: 'block', overflow: 'hidden' }}>
+                                <div style={{ height: '200px', background: 'var(--muted)', position: 'relative' }}>
+                                    {service.images && service.images.length > 0 ? (
+                                        <img src={service.images[0]} alt={service.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     ) : (
-                                        <div style={{ width: '100%', height: '100%', background: 'var(--muted)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--muted-foreground)' }}>
-                                            {service.seller_name?.charAt(0).toUpperCase()}
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted-foreground)' }}>No Portfolio Image</div>
+                                    )}
+                                    <div className="pro-avatar" style={{ position: 'absolute', bottom: '-24px', left: '1rem', border: '4px solid var(--card)', width: '64px', height: '64px' }}>
+                                        {service.seller_image ? (
+                                            <img src={service.seller_image} alt={service.seller_name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                                        ) : (
+                                            <div style={{ width: '100%', height: '100%', background: 'var(--muted)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--muted-foreground)' }}>
+                                                {service.seller_name?.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div style={{ padding: '1rem', paddingTop: '2rem' }}>
+                                    <h3>{service.title}</h3>
+                                    {service.total_reviews > 0 ? (
+                                        <div className="pro-rating">★ {service.average_rating} ({service.total_reviews} reviews)</div>
+                                    ) : (
+                                        <div className="pro-rating" style={{ color: 'var(--muted-foreground)', fontWeight: 'normal' }}>New</div>
+                                    )}
+                                    <div className="pro-details">
+                                        <div className="pro-detail-item">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                                            {service.category}
+                                        </div>
+                                        <div className="pro-detail-item">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                                            {service.location}
+                                        </div>
+                                        <div style={{ marginTop: '1rem', fontWeight: '700', color: 'var(--foreground)' }}>
+                                            ${service.price} <span style={{ fontWeight: '400', fontSize: '0.9rem', color: 'var(--muted-foreground)' }}>per event</span>
+                                        </div>
+                                    </div>
+                                    {service.images && service.images.length > 1 && (
+                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                                            {service.images.slice(1, 4).map((img, idx) => (
+                                                <img key={idx} src={img} alt={`Portfolio ${idx}`} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '0.25rem' }} />
+                                            ))}
                                         </div>
                                     )}
-                                </div>
-                                <h3>{service.title}</h3>
-                                <div className="pro-rating">★ 4.8 (24 reviews)</div>
-                                <div className="pro-details">
-                                    <div className="pro-detail-item">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                                        {service.category}
-                                    </div>
-                                    <div className="pro-detail-item">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                                        {service.location}
-                                    </div>
-                                    <div style={{ marginTop: '1rem', fontWeight: '700', color: 'var(--foreground)' }}>
-                                        ${service.price} <span style={{ fontWeight: '400', fontSize: '0.9rem', color: 'var(--muted-foreground)' }}>per event</span>
-                                    </div>
                                 </div>
                             </Link>
                         )) : (
