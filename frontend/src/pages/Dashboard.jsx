@@ -195,12 +195,19 @@ const Dashboard = () => {
                 </div>
                 <div className="card">
                     <h3>Active Bookings</h3>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ec4899' }}>{bookings.length}</p>
+                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ec4899' }}>
+                        {bookings.filter(b => b.status === 'accepted' && !b.is_completed).length}
+                    </p>
                     <button onClick={scrollToBookings} className="btn btn-outline" style={{ marginTop: '1rem', width: '100%' }}>View All</button>
                 </div>
                 <div className="card">
                     <h3>Total Earnings</h3>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>$0.00</p>
+                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
+                        ${bookings
+                            .filter(b => b.payment_status === 'paid')
+                            .reduce((sum, b) => sum + (parseFloat(b.service_price) || 0), 0)
+                            .toFixed(2)}
+                    </p>
                     <button className="btn btn-outline" style={{ marginTop: '1rem', width: '100%' }}>View Reports</button>
                 </div>
             </div>
@@ -216,7 +223,21 @@ const Dashboard = () => {
                                 <p>Date: {new Date(booking.booking_date).toLocaleDateString()}</p>
                                 <p>Contact: {booking.contact_info || 'N/A'}</p>
                                 <p>Location: {booking.location || 'N/A'}</p>
-                                <p>Status: <span style={{ color: booking.status === 'pending' ? '#fbbf24' : booking.status === 'accepted' ? '#10b981' : '#ef4444' }}>{booking.status}</span></p>
+                                <p>Price: ${booking.service_price}</p>
+                                <p>Status:
+                                    <span style={{
+                                        color: booking.is_completed ? '#10b981' :
+                                            booking.payment_status === 'paid' ? '#f59e0b' :
+                                                booking.status === 'accepted' ? '#10b981' :
+                                                    booking.status === 'rejected' ? '#ef4444' : '#fbbf24',
+                                        fontWeight: 'bold',
+                                        marginLeft: '0.5rem'
+                                    }}>
+                                        {booking.is_completed ? 'Completed' :
+                                            booking.payment_status === 'paid' ? 'Paid' :
+                                                booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                    </span>
+                                </p>
 
                                 {booking.status === 'pending' && (
                                     <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>

@@ -150,3 +150,23 @@ export const completeBooking = async (bookingId) => {
     });
     return res.json();
 };
+
+export const getUserProfile = async () => {
+    const response = await fetch(`${API_URL}/users/profile`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+    });
+    return response.json();
+};
+
+export const updateUserProfile = async (formData) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/users/profile`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData
+    });
+    return response.json();
+};

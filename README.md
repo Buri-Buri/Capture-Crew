@@ -11,7 +11,9 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
     -   **Secure Authentication**: Email/Password login via Supabase.
     -   **Role-Based Access**: Separate dashboards for Customers (hire professionals) and Sellers (offer services).
     -   **Profile Management**: Upload profile pictures and manage account details.
--   **Seller Dashboard**: Manage services, view active bookings, and update booking statuses.
+-   **Real-time Messaging**: Chat directly with professionals or clients to discuss booking details.
+-   **Profile Page**: Dedicated profile view with personal information, bio, and experience details.
+-   **Seller Dashboard**: Manage services, view active bookings, track earnings, and update booking statuses (Accepted, Completed, Paid).
 -   **Modern UI**: Responsive design with a custom OKLCH color palette and dark mode support.
 
 ## Tech Stack

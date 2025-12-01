@@ -70,10 +70,14 @@ const Navbar = () => {
                                     <img src={user.profile_picture} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
                                 ) : (
                                     <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>
-                                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                                        {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
                                     </div>
                                 )}
                                 Dashboard
+                            </Link>
+                            <Link to="/profile" className="btn btn-outline" style={{ border: 'none', padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                Profile
                             </Link>
                             <button onClick={handleLogout} className="btn btn-outline">Logout</button>
                         </>

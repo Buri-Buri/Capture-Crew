@@ -74,6 +74,7 @@ const getSellerBookings = async (req, res) => {
                 *,
                 services!inner (
                     title,
+                    price,
                     seller_id
                 ),
                 users (
@@ -88,6 +89,7 @@ const getSellerBookings = async (req, res) => {
         const formattedBookings = data.map(booking => ({
             ...booking,
             service_title: booking.services?.title,
+            service_price: booking.services?.price,
             customer_name: booking.users?.username
         }));
 

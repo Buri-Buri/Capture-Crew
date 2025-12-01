@@ -28,6 +28,8 @@ const setupDatabase = async () => {
                 password_hash VARCHAR(255),
                 role ENUM('customer', 'seller', 'admin') DEFAULT 'customer',
                 profile_picture VARCHAR(255),
+                bio TEXT,
+                experience TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);

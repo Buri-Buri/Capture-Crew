@@ -9,6 +9,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CustomerDashboard from './pages/CustomerDashboard';
 import Messages from './pages/Messages';
+import ProfileSettings from './pages/ProfileSettings';
+import Profile from './pages/Profile';
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -27,6 +29,8 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/customer-dashboard" element={<CustomerDashboard />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/settings" element={<ProfileSettings />} />
           </Routes>
         </div>
       </Router>
