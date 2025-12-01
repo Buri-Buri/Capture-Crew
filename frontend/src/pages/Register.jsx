@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../utils/api';
-
-import { GoogleLogin } from '@react-oauth/google';
+import { useToast } from '../context/ToastContext';
 
 const Register = () => {
     const navigate = useNavigate();
-    const location = useLocation();
+    const { showToast } = useToast();
     const [formData, setFormData] = useState({
         username: '',
         email: '',
@@ -14,46 +13,8 @@ const Register = () => {
         role: 'customer'
     });
 
-    useEffect(() => {
-        if (location.state && location.state.googleData) {
-            setFormData(prev => ({
-                ...prev,
-                username: location.state.googleData.username,
-                email: location.state.googleData.email
-            }));
-            alert('Please complete your registration (Role & Password).');
-        }
-    }, [location.state]);
-
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleGoogleSuccess = async (credentialResponse) => {
-        try {
-            const res = await fetch('http://localhost:5000/api/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: credentialResponse.credential })
-            });
-            const data = await res.json();
-            if (res.status === 200) {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                alert('Login successful!');
-                if (data.user.role === 'seller') navigate('/dashboard');
-                else navigate('/customer-dashboard');
-            } else if (res.status === 202) {
-                setFormData({
-                    ...formData,
-                    username: data.googleData.username,
-                    email: data.googleData.email
-                });
-                alert('Please complete your registration (Role & Password).');
-            }
-        } catch (error) {
-            console.error('Google Auth Error', error);
-        }
     };
 
     const handleSubmit = async (e) => {
@@ -61,14 +22,14 @@ const Register = () => {
         try {
             const data = await registerUser(formData);
             if (data.userId) {
-                alert('Registration successful! Please login.');
+                showToast('Registration successful! Please login.', 'success');
                 navigate('/login');
             } else {
-                alert(data.message || 'Registration failed');
+                showToast(data.message || 'Registration failed', 'error');
             }
         } catch (error) {
             console.error('Registration error:', error);
-            alert('An error occurred during registration.');
+            showToast('An error occurred during registration.', 'error');
         }
     };
 
@@ -76,10 +37,6 @@ const Register = () => {
         <div className="container" style={{ paddingTop: '100px', maxWidth: '500px' }}>
             <div className="card">
                 <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Create Account</h2>
-                <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-                    <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => console.log('Login Failed')} />
-                </div>
-                <div style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#94a3b8' }}>OR</div>
                 <form onSubmit={handleSubmit}>
                     <div style={{ marginBottom: '1rem' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem' }}>Username</label>
