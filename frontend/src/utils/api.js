@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
@@ -222,4 +222,17 @@ export const deleteServiceImage = async (serviceId, imageUrl) => {
         console.error('Non-JSON response:', text);
         throw new Error('Server returned unexpected response (likely 404). Please restart the backend server.');
     }
+};
+
+
+export const uploadProfilePicture = async (formData) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/users/profile-picture`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData
+    });
+    return res.json();
 };

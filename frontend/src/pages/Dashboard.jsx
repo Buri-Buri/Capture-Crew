@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSellerBookings, updateBookingStatus, createService, getMyServices, updatePaymentStatus } from '../utils/api';
+import { getSellerBookings, updateBookingStatus, createService, getMyServices, updatePaymentStatus, uploadProfilePicture } from '../utils/api';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -114,15 +114,8 @@ const Dashboard = () => {
         formData.append('profile_picture', file);
 
         try {
-            const res = await fetch('http://localhost:5000/api/users/profile-picture', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-            const data = await res.json();
-            if (res.ok) {
+            const data = await uploadProfilePicture(formData);
+            if (data.profile_picture) {
                 showToast('Profile picture updated!', 'success');
                 updateUser({ profile_picture: data.profile_picture });
             } else {
