@@ -1,77 +1,79 @@
 import React, { useState, useEffect } from 'react';
-import { createService, getMyServices, getSellerBookings, updateBookingStatus, completeBooking, updatePaymentStatus } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
+import { getSellerBookings, updateBookingStatus, createService, getMyServices, updatePaymentStatus } from '../utils/api';
+import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const token = localStorage.getItem('token');
-    const [showModal, setShowModal] = useState(false);
-    const [services, setServices] = useState([]);
+    const { showToast } = useToast();
+    const { user, updateUser } = useAuth();
     const [bookings, setBookings] = useState([]);
+    const [services, setServices] = useState([]);
+    const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         price: '',
         category: 'Photography'
     });
-    const [imageFiles, setImageFiles] = useState([]);
     const [imageLinks, setImageLinks] = useState('');
+    const [imageFiles, setImageFiles] = useState([]);
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
-        fetchServices();
         fetchBookings();
+        fetchServices();
     }, []);
-
-    const fetchServices = async () => {
-        try {
-            const data = await getMyServices();
-            if (Array.isArray(data)) {
-                setServices(data);
-            }
-        } catch (error) {
-            console.error('Error fetching services:', error);
-        }
-    };
 
     const fetchBookings = async () => {
         try {
             const data = await getSellerBookings();
-            if (Array.isArray(data)) {
-                setBookings(data);
-            }
+            setBookings(data);
         } catch (error) {
             console.error('Error fetching bookings:', error);
+            showToast('Failed to load bookings', 'error');
+        }
+    };
+
+    const fetchServices = async () => {
+        try {
+            const data = await getMyServices();
+            setServices(data);
+        } catch (error) {
+            console.error('Error fetching services:', error);
+            showToast('Failed to load services', 'error');
         }
     };
 
     const handleStatusUpdate = async (bookingId, status) => {
         try {
             const res = await updateBookingStatus(bookingId, status);
-            if (res.message === 'Booking status updated') {
-                alert(`Booking ${status} successfully!`);
+            if (res.booking) {
+                showToast(`Booking ${status} successfully!`, 'success');
                 fetchBookings();
             } else {
-                alert('Failed to update status');
+                showToast('Failed to update booking status', 'error');
             }
         } catch (error) {
             console.error('Error updating status:', error);
-            alert('Error updating status');
+            showToast('Error updating booking status', 'error');
         }
     };
 
     const handleComplete = async (bookingId) => {
         if (!window.confirm('Are you sure you want to mark this booking as completed?')) return;
         try {
-            const res = await completeBooking(bookingId);
-            if (res.message === 'Booking marked as completed') {
-                alert('Booking completed!');
+            const res = await updateBookingStatus(bookingId, 'completed');
+            if (res.booking) {
+                showToast('Booking marked as completed!', 'success');
                 fetchBookings();
             } else {
-                alert('Failed to complete booking: ' + (res.message || 'Unknown error'));
+                showToast('Failed to complete booking', 'error');
             }
         } catch (error) {
             console.error('Error completing booking:', error);
+            showToast('Error completing booking', 'error');
         }
     };
 
@@ -80,11 +82,12 @@ const Dashboard = () => {
         try {
             const res = await updatePaymentStatus(bookingId, status);
             if (res.message) {
-                alert('Payment status updated!');
+                showToast('Payment status updated!', 'success');
                 fetchBookings();
             }
         } catch (error) {
             console.error('Error updating payment:', error);
+            showToast('Error updating payment status', 'error');
         }
     };
 
@@ -120,16 +123,14 @@ const Dashboard = () => {
             });
             const data = await res.json();
             if (res.ok) {
-                alert('Profile picture updated!');
-                const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                const updatedUser = { ...currentUser, profile_picture: data.profile_picture };
-                localStorage.setItem('user', JSON.stringify(updatedUser));
-                window.location.reload();
+                showToast('Profile picture updated!', 'success');
+                updateUser({ profile_picture: data.profile_picture });
             } else {
-                alert('Failed to update profile picture');
+                showToast('Failed to update profile picture', 'error');
             }
         } catch (error) {
             console.error('Error uploading profile picture:', error);
+            showToast('Error uploading profile picture', 'error');
         }
     };
 
@@ -149,18 +150,18 @@ const Dashboard = () => {
 
             const res = await createService(data);
             if (res.serviceId) {
-                alert('Service created successfully!');
+                showToast('Service created successfully!', 'success');
                 setShowModal(false);
                 setFormData({ title: '', description: '', price: '', category: 'Photography' });
                 setImageFiles([]);
                 setImageLinks('');
                 fetchServices();
             } else {
-                alert('Failed to create service');
+                showToast('Failed to create service', 'error');
             }
         } catch (error) {
             console.error('Error creating service:', error);
-            alert('Error creating service');
+            showToast('Error creating service', 'error');
         }
     };
 

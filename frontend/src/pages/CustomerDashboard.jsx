@@ -1,143 +1,196 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { getMyBookings, addReview } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const CustomerDashboard = () => {
-    const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
     const [bookings, setBookings] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const { showToast } = useToast();
+    const [user, setUser] = useState({});
+
+    // Review Modal State
     const [showReviewModal, setShowReviewModal] = useState(false);
-    const [selectedBookingId, setSelectedBookingId] = useState(null);
-    const [reviewData, setReviewData] = useState({ rating: 5, comment: '' });
+    const [selectedBooking, setSelectedBooking] = useState(null);
+    const [rating, setRating] = useState(5);
+    const [comment, setComment] = useState('');
 
     useEffect(() => {
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        setUser(userData);
         fetchBookings();
     }, []);
 
     const fetchBookings = async () => {
         try {
             const data = await getMyBookings();
-            if (Array.isArray(data)) {
-                setBookings(data);
-            }
+            setBookings(data);
+            setLoading(false);
         } catch (error) {
             console.error('Error fetching bookings:', error);
+            showToast('Failed to load bookings', 'error');
+            setLoading(false);
         }
     };
 
-    const openReviewModal = (bookingId) => {
-        setSelectedBookingId(bookingId);
-        setReviewData({ rating: 5, comment: '' });
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'pending': return '#f59e0b'; // amber
+            case 'confirmed': return '#10b981'; // green
+            case 'accepted': return '#10b981'; // green
+            case 'completed': return '#3b82f6'; // blue
+            case 'cancelled': return '#ef4444'; // red
+            case 'rejected': return '#ef4444'; // red
+            default: return 'var(--muted-foreground)';
+        }
+    };
+
+    const openReviewModal = (booking) => {
+        setSelectedBooking(booking);
+        setRating(5);
+        setComment('');
         setShowReviewModal(true);
     };
 
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
+        if (!selectedBooking) return;
+
         try {
-            const res = await addReview({ ...reviewData, bookingId: selectedBookingId });
-            if (res.message === 'Review added successfully') {
-                alert('Review submitted!');
-                setShowReviewModal(false);
-                // Optionally refresh bookings or mark as reviewed locally if you track that
-            } else {
-                alert(res.message || 'Failed to submit review');
-            }
+            await addReview({
+                service_id: selectedBooking.service_id,
+                rating: parseInt(rating),
+                comment
+            });
+            showToast('Review submitted successfully!', 'success');
+            setShowReviewModal(false);
+            // Optionally refresh bookings or update UI to show review is submitted
         } catch (error) {
             console.error('Error submitting review:', error);
-            alert(`Error submitting review: ${error.message}`);
+            showToast(error.message || 'Failed to submit review', 'error');
         }
     };
 
+    if (loading) return <div className="container" style={{ paddingTop: '100px', textAlign: 'center' }}>Loading...</div>;
+
+    const activeBookings = bookings.filter(b => b.status === 'accepted' || b.status === 'pending').length;
+    const completedBookings = bookings.filter(b => b.status === 'completed').length;
+
     return (
-        <div className="container" style={{ paddingTop: '100px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h2>My Account</h2>
-                <span className="btn btn-outline">Welcome, {user.username || 'User'}</span>
+        <div className="container" style={{ paddingTop: '100px', paddingBottom: '4rem' }}>
+            <div style={{ marginBottom: '3rem' }}>
+                <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '0.5rem', color: 'var(--foreground)' }}>
+                    Welcome back, {user.username || 'Customer'}!
+                </h1>
+                <p style={{ color: 'var(--muted-foreground)', fontSize: '1.1rem' }}>Manage your bookings and reviews.</p>
             </div>
 
-            <div className="grid">
+            <div className="grid" style={{ marginBottom: '3rem' }}>
                 <div className="card">
-                    <h3>My Bookings</h3>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#6366f1' }}>{bookings.length}</p>
-                    <Link to="/services" className="btn btn-primary" style={{ marginTop: '1rem', width: '100%', display: 'block', textAlign: 'center' }}>Find Professionals</Link>
+                    <h3>Active Bookings</h3>
+                    <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>{activeBookings}</p>
                 </div>
                 <div className="card">
-                    <h3>Saved Services</h3>
-                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ec4899' }}>0</p>
-                    <button className="btn btn-outline" style={{ marginTop: '1rem', width: '100%' }}>View Saved</button>
+                    <h3>Completed Services</h3>
+                    <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--secondary)' }}>{completedBookings}</p>
+                </div>
+                <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--muted)' }}>
+                    <Link to="/services" className="btn btn-primary" style={{ width: '100%', fontSize: '1.1rem' }}>
+                        + Book New Service
+                    </Link>
                 </div>
             </div>
 
-            <div style={{ marginTop: '3rem' }}>
-                <h3>Recent Activity</h3>
-                {bookings.length > 0 ? (
-                    <div className="grid">
-                        {bookings.map((booking) => (
-                            <div key={booking.id} className="card">
-                                <h4>{booking.service_title}</h4>
-                                <p>Date: {new Date(booking.booking_date).toLocaleDateString()}</p>
-                                <p>Status: <span style={{
-                                    color: booking.is_completed ? '#10b981' :
-                                        booking.status === 'rejected' ? '#ef4444' :
-                                            booking.status === 'accepted' ? '#10b981' : '#fbbf24',
-                                    fontWeight: 'bold'
+            <h2 style={{ marginBottom: '1.5rem', fontSize: '1.8rem', fontWeight: '700', color: 'var(--foreground)' }}>My Bookings</h2>
+
+            {bookings.length === 0 ? (
+                <div className="card" style={{ textAlign: 'center', padding: '4rem 2rem', borderStyle: 'dashed' }}>
+                    <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📅</div>
+                    <h3 style={{ marginBottom: '1rem', color: 'var(--foreground)' }}>No bookings yet</h3>
+                    <p style={{ marginBottom: '2rem', color: 'var(--muted-foreground)' }}>Explore our talented professionals and book your first service today!</p>
+                    <Link to="/services" className="btn btn-primary">Browse Services</Link>
+                </div>
+            ) : (
+                <div className="grid">
+                    {bookings.map((booking) => (
+                        <div key={booking.id} className="card" style={{ position: 'relative' }}>
+                            <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+                                <span style={{
+                                    backgroundColor: getStatusColor(booking.status),
+                                    color: 'white',
+                                    padding: '0.25rem 0.75rem',
+                                    borderRadius: '9999px',
+                                    fontSize: '0.8rem',
+                                    fontWeight: '600',
+                                    textTransform: 'capitalize'
                                 }}>
-                                    {booking.is_completed ? 'Completed' : booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                                </span></p>
-                                <button onClick={() => navigate('/messages', { state: { sellerId: booking.seller_id, sellerName: booking.seller_name } })} className="btn btn-outline" style={{ marginTop: '0.5rem', width: '100%' }}>Message Seller</button>
-
-                                {booking.is_completed && (
-                                    <button onClick={() => openReviewModal(booking.id)} className="btn btn-primary" style={{ marginTop: '0.5rem', width: '100%', background: '#f59e0b', borderColor: '#f59e0b' }}>Write a Review</button>
-                                )}
+                                    {booking.status}
+                                </span>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="card" style={{ marginTop: '1rem', textAlign: 'center', color: '#94a3b8' }}>
-                        No bookings yet. Start exploring!
-                    </div>
-                )}
-            </div>
+                            <h3 style={{ paddingRight: '4rem' }}>{booking.service_title}</h3>
+                            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <p><strong>Date:</strong> {new Date(booking.booking_date).toLocaleDateString()}</p>
+                                <p><strong>Price:</strong> ${booking.total_price}</p>
+                                <p><strong>Provider:</strong> {booking.seller_name || 'Service Provider'}</p>
+                            </div>
 
+                            {booking.status === 'completed' && (
+                                <button
+                                    className="btn btn-outline"
+                                    style={{ marginTop: '1.5rem', width: '100%' }}
+                                    onClick={() => openReviewModal(booking)}
+                                >
+                                    Leave a Review
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Review Modal */}
             {showReviewModal && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000
-                }}>
-                    <div className="card" style={{ width: '100%', maxWidth: '500px', position: 'relative' }}>
-                        <button onClick={() => setShowReviewModal(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                <div className="modal-overlay" onClick={() => setShowReviewModal(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
                         <h3 style={{ marginBottom: '1.5rem' }}>Write a Review</h3>
                         <form onSubmit={handleReviewSubmit}>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Rating</label>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <span
-                                            key={star}
-                                            onClick={() => setReviewData({ ...reviewData, rating: star })}
-                                            style={{
-                                                fontSize: '2rem',
-                                                cursor: 'pointer',
-                                                color: star <= reviewData.rating ? '#fbbf24' : '#4b5563'
-                                            }}
-                                        >
-                                            ★
-                                        </span>
-                                    ))}
-                                </div>
+                            <div className="form-group">
+                                <label>Rating</label>
+                                <select
+                                    value={rating}
+                                    onChange={(e) => setRating(e.target.value)}
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)' }}
+                                >
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Very Good</option>
+                                    <option value="3">3 - Good</option>
+                                    <option value="2">2 - Fair</option>
+                                    <option value="1">1 - Poor</option>
+                                </select>
                             </div>
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Comment</label>
+                            <div className="form-group">
+                                <label>Comment</label>
                                 <textarea
-                                    value={reviewData.comment}
-                                    onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
                                     rows="4"
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }}
-                                    placeholder="Share your experience..."
                                     required
-                                ></textarea>
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)' }}
+                                    placeholder="Share your experience..."
+                                />
                             </div>
-                            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Submit Review</button>
+                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                                <button
+                                    type="button"
+                                    className="btn btn-outline"
+                                    onClick={() => setShowReviewModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn btn-primary">
+                                    Submit Review
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

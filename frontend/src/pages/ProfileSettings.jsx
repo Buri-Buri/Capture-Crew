@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile, updateUserProfile } from '../utils/api';
+import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 
 const ProfileSettings = () => {
     const navigate = useNavigate();
+    const { showToast } = useToast();
+    const { updateUser } = useAuth();
     const [user, setUser] = useState({
         username: '',
         bio: '',
@@ -32,6 +36,7 @@ const ProfileSettings = () => {
             setLoading(false);
         } catch (error) {
             console.error('Error fetching profile:', error);
+            showToast('Failed to load profile', 'error');
             setLoading(false);
         }
     };
@@ -59,15 +64,13 @@ const ProfileSettings = () => {
         try {
             const res = await updateUserProfile(formData);
             if (res.user) {
-                alert('Profile updated successfully!');
-                // Update local storage user data if needed
-                const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                localStorage.setItem('user', JSON.stringify({ ...currentUser, ...res.user }));
+                showToast('Profile updated successfully!', 'success');
+                updateUser(res.user);
                 navigate(role === 'seller' ? '/dashboard' : '/customer-dashboard');
             }
         } catch (error) {
             console.error('Error updating profile:', error);
-            alert('Failed to update profile');
+            showToast('Failed to update profile', 'error');
         }
     };
 

@@ -35,7 +35,7 @@ const Home = () => {
             <section className="hero">
                 <div className="container">
                     <div style={{ display: 'inline-block', padding: '0.5rem 1rem', background: 'var(--secondary)', color: 'var(--secondary-foreground)', borderRadius: '999px', fontSize: '0.875rem', fontWeight: '600', marginBottom: '1.5rem' }}>
-                        🎉 Your Event, Our Professionals
+                        Your Event, Our Professionals
                     </div>
                     <h1>Find Perfect <br /> Photographers & Event Planners</h1>
                     <p>Connect with trusted professionals for your weddings, birthdays, corporate events, and more. Browse portfolios, compare prices, and book with confidence.</p>

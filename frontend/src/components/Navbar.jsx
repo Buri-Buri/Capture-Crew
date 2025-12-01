@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
     const navigate = useNavigate();
-    let user = {};
-    try {
-        user = JSON.parse(localStorage.getItem('user') || '{}');
-    } catch (e) {
-        console.error('Invalid user data in localStorage', e);
-        localStorage.removeItem('user');
-    }
-    const token = localStorage.getItem('token');
+    const { user, logout } = useAuth();
     const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
@@ -38,8 +32,7 @@ const Navbar = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        logout();
         navigate('/login');
     };
 
@@ -53,7 +46,6 @@ const Navbar = () => {
                 <div className="nav-links">
                     <Link to="/services">Services</Link>
                     <Link to="/">How It Works</Link>
-                    <Link to="/">Testimonials</Link>
 
                     <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle Dark Mode">
                         {isDark ? (
@@ -63,7 +55,7 @@ const Navbar = () => {
                         )}
                     </button>
 
-                    {token ? (
+                    {user ? (
                         <>
                             <Link to={user.role === 'seller' ? "/dashboard" : "/customer-dashboard"} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
                                 {user.profile_picture ? (

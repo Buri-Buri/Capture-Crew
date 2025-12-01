@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getAllServices, createBooking, getServiceReviews } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 const ServiceDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [service, setService] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -32,6 +34,7 @@ const ServiceDetails = () => {
             }
         } catch (error) {
             console.error('Error fetching service details:', error);
+            showToast('Failed to load service details', 'error');
         } finally {
             setLoading(false);
         }
@@ -40,7 +43,7 @@ const ServiceDetails = () => {
     const handleBookingSubmit = async (e) => {
         e.preventDefault();
         if (!localStorage.getItem('token')) {
-            alert('Please login to book a service');
+            showToast('Please login to book a service', 'info');
             navigate('/login');
             return;
         }
@@ -51,15 +54,15 @@ const ServiceDetails = () => {
                 ...bookingData
             });
             if (res.bookingId) {
-                alert('Booking request sent successfully!');
+                showToast('Booking request sent successfully!', 'success');
                 setShowBooking(false);
                 navigate('/customer-dashboard');
             } else {
-                alert('Failed to book service');
+                showToast('Failed to book service', 'error');
             }
         } catch (error) {
             console.error('Error booking service:', error);
-            alert('Error booking service');
+            showToast('Error booking service', 'error');
         }
     };
 
@@ -144,11 +147,12 @@ const ServiceDetails = () => {
                                                                 try {
                                                                     const { deleteServiceImage } = await import('../utils/api');
                                                                     await deleteServiceImage(service.id, img);
+                                                                    showToast('Image deleted successfully', 'success');
                                                                     // Refresh details
                                                                     fetchServiceDetails();
                                                                 } catch (error) {
                                                                     console.error('Error deleting image:', error);
-                                                                    alert(error.message || 'Failed to delete image');
+                                                                    showToast(error.message || 'Failed to delete image', 'error');
                                                                 }
                                                             }
                                                         }}

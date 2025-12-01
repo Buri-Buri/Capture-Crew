@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginUser } from '../utils/api';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { login } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -20,8 +22,7 @@ const Login = () => {
         try {
             const data = await loginUser(formData);
             if (data.token) {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
+                login(data.user, data.token);
                 showToast('Login successful!', 'success');
                 // Redirect based on role
                 if (data.user.role === 'seller') {
