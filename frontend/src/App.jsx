@@ -13,37 +13,35 @@ import ProfileSettings from './pages/ProfileSettings';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
 
-import { GoogleOAuthProvider } from '@react-oauth/google';
+
 
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID"}>
-      <ToastProvider>
-        <AuthProvider>
-          <Router>
-            <div className="app">
-              <Navbar />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/service/:id" element={<ServiceDetails />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/customer-dashboard" element={<CustomerDashboard />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/profile/settings" element={<ProfileSettings />} />
-                <Route path="/reports" element={<Reports />} />
-              </Routes>
-            </div>
-          </Router>
-        </AuthProvider>
-      </ToastProvider>
-    </GoogleOAuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <Router>
+          <div className="app">
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/service/:id" element={<ServiceDetails />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/customer-dashboard" element={<CustomerDashboard />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/settings" element={<ProfileSettings />} />
+              <Route path="/reports" element={<Reports />} />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 
