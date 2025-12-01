@@ -4,6 +4,7 @@ import { getAllServices, createBooking } from '../utils/api';
 import BookingModal from '../components/BookingModal';
 
 const Services = () => {
+    const navigate = useNavigate();
     const [services, setServices] = useState([]);
     const [selectedServiceId, setSelectedServiceId] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,7 +61,14 @@ const Services = () => {
             <h2 className="section-title">Find Professionals</h2>
             <div className="grid">
                 {services.map((service) => (
-                    <div key={service.id} className="card">
+                    <div
+                        key={service.id}
+                        className="card"
+                        onClick={() => navigate(`/service/${service.id}`)}
+                        style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                    >
                         {service.images && service.images.length > 0 ? (
                             <div style={{ display: 'flex', overflowX: 'auto', gap: '0.5rem', marginBottom: '1rem', paddingBottom: '0.5rem' }}>
                                 {service.images.map((img, index) => (
@@ -75,7 +83,15 @@ const Services = () => {
                         <p style={{ marginTop: '0.5rem' }}>{service.description}</p>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
                             <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#6366f1' }}>${service.price}</span>
-                            <button className="btn btn-primary" onClick={() => openBookingModal(service.id)}>Book Now</button>
+                            <button
+                                className="btn btn-primary"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    openBookingModal(service.id);
+                                }}
+                            >
+                                Book Now
+                            </button>
                         </div>
                     </div>
                 ))}

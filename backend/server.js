@@ -26,7 +26,11 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/reviews', require('./routes/reviewRoutes'));
+const fs = require('fs');
+app.use('/api/reviews', (req, res, next) => {
+    fs.appendFileSync('server_debug.log', `Server: Request received for /api/reviews ${req.method} ${req.url}\n`);
+    next();
+}, require('./routes/reviewRoutes'));
 
 app.get('/', (req, res) => {
     res.send('CaptureCrew API is running');

@@ -9,6 +9,23 @@ const sendMessage = async (req, res) => {
             return res.status(400).json({ message: 'Receiver and content are required' });
         }
 
+        // Check if sender is a seller and receiver is also a seller
+        if (req.user.role === 'seller') {
+            const { data: receiver, error: userError } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', receiver_id)
+                .single();
+
+            if (userError || !receiver) {
+                return res.status(404).json({ message: 'Receiver not found' });
+            }
+
+            if (receiver.role === 'seller') {
+                return res.status(403).json({ message: 'Sellers cannot message other sellers' });
+            }
+        }
+
         const { error } = await supabase
             .from('messages')
             .insert([

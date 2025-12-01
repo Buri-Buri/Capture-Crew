@@ -110,7 +110,14 @@ const ServiceDetails = () => {
                         <div style={{ textAlign: 'right' }}>
                             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--primary)' }}>${service.price}</div>
                             <div style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>per event</div>
-                            <button onClick={() => navigate('/messages', { state: { sellerId: service.seller_id, sellerName: service.seller_name, sellerImage: service.seller_image } })} className="btn btn-outline" style={{ marginTop: '0.5rem', fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>Message Seller</button>
+                            {(() => {
+                                const userStr = localStorage.getItem('user');
+                                const user = userStr ? JSON.parse(userStr) : null;
+                                if (user && user.role === 'seller') {
+                                    return null;
+                                }
+                                return <button onClick={() => navigate('/messages', { state: { sellerId: service.seller_id, sellerName: service.seller_name, sellerImage: service.seller_image } })} className="btn btn-outline" style={{ marginTop: '0.5rem', fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>Message Seller</button>;
+                            })()}
                         </div>
                     </div>
 
@@ -124,13 +131,64 @@ const ServiceDetails = () => {
                             <h3>Portfolio</h3>
                             <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem' }}>
                                 {service.images.map((img, index) => (
-                                    <img key={index} src={img} alt={`Portfolio ${index}`} style={{ height: '200px', borderRadius: '0.5rem', objectFit: 'cover' }} />
+                                    <div key={index} style={{ position: 'relative', flexShrink: 0 }}>
+                                        <img src={img} alt={`Portfolio ${index}`} style={{ height: '200px', borderRadius: '0.5rem', objectFit: 'cover' }} />
+                                        {(() => {
+                                            const userStr = localStorage.getItem('user');
+                                            const user = userStr ? JSON.parse(userStr) : null;
+                                            if (user && user.id === service.seller_id) {
+                                                return (
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (window.confirm('Are you sure you want to delete this image?')) {
+                                                                try {
+                                                                    const { deleteServiceImage } = await import('../utils/api');
+                                                                    await deleteServiceImage(service.id, img);
+                                                                    // Refresh details
+                                                                    fetchServiceDetails();
+                                                                } catch (error) {
+                                                                    console.error('Error deleting image:', error);
+                                                                    alert(error.message || 'Failed to delete image');
+                                                                }
+                                                            }
+                                                        }}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '0.5rem',
+                                                            right: '0.5rem',
+                                                            background: 'rgba(255, 0, 0, 0.8)',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '50%',
+                                                            width: '24px',
+                                                            height: '24px',
+                                                            cursor: 'pointer',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            fontSize: '14px'
+                                                        }}
+                                                    >
+                                                        ×
+                                                    </button>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+                                    </div>
                                 ))}
                             </div>
                         </div>
                     )}
 
-                    <button onClick={() => setShowBooking(true)} className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.125rem' }}>Book Now</button>
+                    {(() => {
+                        const userStr = localStorage.getItem('user');
+                        const user = userStr ? JSON.parse(userStr) : null;
+                        if (user && user.role === 'seller') {
+                            return <div style={{ padding: '1rem', background: 'var(--muted)', textAlign: 'center', borderRadius: '0.5rem' }}>Sellers cannot book services</div>;
+                        }
+                        return <button onClick={() => setShowBooking(true)} className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.125rem' }}>Book Now</button>;
+                    })()}
                 </div>
             </div>
 
@@ -168,7 +226,10 @@ const ServiceDetails = () => {
             {showBooking && (
                 <div className="modal-overlay" onClick={() => setShowBooking(false)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
-                        <h2>Book Service</h2>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Book Service</h2>
+                            <button onClick={() => setShowBooking(false)} style={{ background: 'none', border: 'none', color: 'var(--muted-foreground)', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                        </div>
                         <form onSubmit={handleBookingSubmit}>
                             <div className="form-group">
                                 <label>Date</label>
@@ -199,7 +260,7 @@ const ServiceDetails = () => {
                                     onChange={e => setBookingData({ ...bookingData, location: e.target.value })}
                                 />
                             </div>
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                                 <button type="button" onClick={() => setShowBooking(false)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>
                                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Confirm Booking</button>
                             </div>

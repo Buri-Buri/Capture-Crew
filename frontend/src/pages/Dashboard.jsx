@@ -277,7 +277,14 @@ const Dashboard = () => {
                 ) : (
                     <div className="grid" style={{ marginTop: '1rem' }}>
                         {services.map((service) => (
-                            <div key={service.id} className="card">
+                            <div
+                                key={service.id}
+                                className="card"
+                                onClick={() => navigate(`/service/${service.id}`)}
+                                style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                            >
                                 {service.images && service.images.length > 0 ? (
                                     <div style={{ display: 'flex', overflowX: 'auto', gap: '0.5rem', marginBottom: '1rem', paddingBottom: '0.5rem' }}>
                                         {service.images.map((img, index) => (

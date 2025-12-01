@@ -179,4 +179,58 @@ const getAllServices = async (req, res) => {
     }
 };
 
-module.exports = { createService, getMyServices, getAllServices };
+const deleteServiceImage = async (req, res) => {
+    try {
+        const { serviceId } = req.params;
+        const { imageUrl } = req.body;
+        const seller_id = req.user.id;
+
+        // Verify ownership
+        const { data: service, error: serviceError } = await supabase
+            .from('services')
+            .select('id, seller_id, image_url')
+            .eq('id', serviceId)
+            .single();
+
+        if (serviceError || !service) {
+            return res.status(404).json({ message: 'Service not found' });
+        }
+
+        if (service.seller_id !== seller_id) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
+
+        // Delete from service_images
+        const { error: deleteError } = await supabase
+            .from('service_images')
+            .delete()
+            .eq('service_id', serviceId)
+            .eq('image_url', imageUrl);
+
+        if (deleteError) throw deleteError;
+
+        // If it was the main image, update it
+        if (service.image_url === imageUrl) {
+            // Find another image to set as main
+            const { data: remainingImages } = await supabase
+                .from('service_images')
+                .select('image_url')
+                .eq('service_id', serviceId)
+                .limit(1);
+
+            const newMainImage = remainingImages && remainingImages.length > 0 ? remainingImages[0].image_url : null;
+
+            await supabase
+                .from('services')
+                .update({ image_url: newMainImage })
+                .eq('id', serviceId);
+        }
+
+        res.json({ message: 'Image deleted successfully' });
+    } catch (error) {
+        console.error('Delete Image Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { createService, getMyServices, getAllServices, deleteServiceImage };

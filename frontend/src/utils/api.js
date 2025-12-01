@@ -195,3 +195,31 @@ export const getServiceReviews = async (serviceId) => {
     const res = await fetch(`${API_URL}/reviews/service/${serviceId}`);
     return res.json();
 };
+
+export const deleteServiceImage = async (serviceId, imageUrl) => {
+    const token = localStorage.getItem('token');
+    const url = `${API_URL}/services/${serviceId}/images`;
+    console.log('Deleting image at URL:', url);
+
+    const res = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ imageUrl })
+    });
+
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data.message || 'Failed to delete image');
+        }
+        return data;
+    } else {
+        const text = await res.text();
+        console.error('Non-JSON response:', text);
+        throw new Error('Server returned unexpected response (likely 404). Please restart the backend server.');
+    }
+};

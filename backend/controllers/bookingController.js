@@ -9,6 +9,10 @@ const createBooking = async (req, res) => {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
+        if (req.user.role === 'seller') {
+            return res.status(403).json({ message: 'Sellers cannot book services' });
+        }
+
         const { data, error } = await supabase
             .from('bookings')
             .insert([
