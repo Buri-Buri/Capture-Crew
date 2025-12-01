@@ -82,7 +82,7 @@ const Services = () => {
                         <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{service.category} • by {service.seller_name}</p>
                         <p style={{ marginTop: '0.5rem' }}>{service.description}</p>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
-                            <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#6366f1' }}>${service.price}</span>
+                            <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#6366f1' }}>৳{service.price}</span>
                             <button
                                 className="btn btn-primary"
                                 onClick={(e) => {

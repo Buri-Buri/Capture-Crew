@@ -179,7 +179,7 @@ const Home = () => {
                                             {service.location}
                                         </div>
                                         <div style={{ marginTop: '1rem', fontWeight: '700', color: 'var(--foreground)' }}>
-                                            ${service.price} <span style={{ fontWeight: '400', fontSize: '0.9rem', color: 'var(--muted-foreground)' }}>per event</span>
+                                            ৳{service.price} <span style={{ fontWeight: '400', fontSize: '0.9rem', color: 'var(--muted-foreground)' }}>per event</span>
                                         </div>
                                     </div>
                                     {service.images && service.images.length > 1 && (

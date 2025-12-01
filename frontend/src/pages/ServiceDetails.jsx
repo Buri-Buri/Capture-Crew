@@ -111,7 +111,7 @@ const ServiceDetails = () => {
                             </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--primary)' }}>${service.price}</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--primary)' }}>৳{service.price}</div>
                             <div style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>per event</div>
                             {(() => {
                                 const userStr = localStorage.getItem('user');

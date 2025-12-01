@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSellerBookings, updateBookingStatus, createService, getMyServices, updatePaymentStatus, uploadProfilePicture } from '../utils/api';
+import { getSellerBookings, updateBookingStatus, createService, getMyServices, updatePaymentStatus, uploadProfilePicture, completeBooking } from '../utils/api';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -64,7 +64,7 @@ const Dashboard = () => {
     const handleComplete = async (bookingId) => {
         if (!window.confirm('Are you sure you want to mark this booking as completed?')) return;
         try {
-            const res = await updateBookingStatus(bookingId, 'completed');
+            const res = await completeBooking(bookingId);
             if (res.booking) {
                 showToast('Booking marked as completed!', 'success');
                 fetchBookings();
@@ -197,7 +197,7 @@ const Dashboard = () => {
                 <div className="card">
                     <h3>Total Earnings</h3>
                     <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
-                        ${bookings
+                        ৳{bookings
                             .filter(b => b.payment_status === 'paid')
                             .reduce((sum, b) => sum + (parseFloat(b.service_price) || 0), 0)
                             .toFixed(2)}
@@ -217,7 +217,7 @@ const Dashboard = () => {
                                 <p>Date: {new Date(booking.booking_date).toLocaleDateString()}</p>
                                 <p>Contact: {booking.contact_info || 'N/A'}</p>
                                 <p>Location: {booking.location || 'N/A'}</p>
-                                <p>Price: ${booking.service_price}</p>
+                                <p>Price: ৳{booking.service_price}</p>
                                 <p>Status:
                                     <span style={{
                                         color: booking.is_completed ? '#10b981' :
@@ -290,7 +290,7 @@ const Dashboard = () => {
                                 )}
                                 <h4>{service.title}</h4>
                                 <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{service.category}</p>
-                                <p style={{ fontWeight: 'bold', marginTop: '0.5rem' }}>${service.price}</p>
+                                <p style={{ fontWeight: 'bold', marginTop: '0.5rem' }}>৳{service.price}</p>
                             </div>
                         ))}
                     </div>
@@ -321,7 +321,7 @@ const Dashboard = () => {
                                     </select>
                                 </div>
                                 <div style={{ marginBottom: '1rem' }}>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Price ($)</label>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Price (৳)</label>
                                     <input type="number" name="price" value={formData.price} onChange={handleChange} required style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
                                 </div>
                                 <div style={{ marginBottom: '1rem' }}>

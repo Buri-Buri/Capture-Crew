@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getMyBookings, addReview } from '../utils/api';
 import { useToast } from '../context/ToastContext';
 
 const CustomerDashboard = () => {
+    const navigate = useNavigate();
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
@@ -130,9 +131,17 @@ const CustomerDashboard = () => {
                             <h3 style={{ paddingRight: '4rem' }}>{booking.service_title}</h3>
                             <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                 <p><strong>Date:</strong> {new Date(booking.booking_date).toLocaleDateString()}</p>
-                                <p><strong>Price:</strong> ${booking.total_price}</p>
+                                <p><strong>Price:</strong> ৳{booking.total_price}</p>
                                 <p><strong>Provider:</strong> {booking.seller_name || 'Service Provider'}</p>
                             </div>
+
+                            <button
+                                className="btn btn-outline"
+                                style={{ marginTop: '1rem', width: '100%' }}
+                                onClick={() => navigate('/messages', { state: { sellerId: booking.seller_id, sellerName: booking.seller_name } })}
+                            >
+                                Message Provider
+                            </button>
 
                             {booking.status === 'completed' && (
                                 <button

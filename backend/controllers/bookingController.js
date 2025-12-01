@@ -41,6 +41,7 @@ const getUserBookings = async (req, res) => {
                 services (
                     title,
                     image_url,
+                    seller_id,
                     users (
                         username
                     )
@@ -56,7 +57,8 @@ const getUserBookings = async (req, res) => {
             ...booking,
             service_title: booking.services?.title,
             image_url: booking.services?.image_url,
-            seller_name: booking.services?.users?.username
+            seller_name: booking.services?.users?.username,
+            seller_id: booking.services?.seller_id
         }));
 
         res.json(formattedBookings);
@@ -131,14 +133,16 @@ const updateBookingStatus = async (req, res) => {
             return res.status(404).json({ message: 'Booking not found or unauthorized' });
         }
 
-        const { error: updateError } = await supabase
+        const { data: updatedBooking, error: updateError } = await supabase
             .from('bookings')
             .update({ status })
-            .eq('id', id);
+            .eq('id', id)
+            .select()
+            .single();
 
         if (updateError) throw updateError;
 
-        res.json({ message: 'Booking status updated' });
+        res.json({ message: 'Booking status updated', booking: updatedBooking });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -172,14 +176,16 @@ const updatePaymentStatus = async (req, res) => {
             return res.status(404).json({ message: 'Booking not found or unauthorized' });
         }
 
-        const { error: updateError } = await supabase
+        const { data: updatedBooking, error: updateError } = await supabase
             .from('bookings')
             .update({ payment_status })
-            .eq('id', id);
+            .eq('id', id)
+            .select()
+            .single();
 
         if (updateError) throw updateError;
 
-        res.json({ message: 'Payment status updated' });
+        res.json({ message: 'Payment status updated', booking: updatedBooking });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -208,14 +214,16 @@ const completeBooking = async (req, res) => {
             return res.status(404).json({ message: 'Booking not found or unauthorized' });
         }
 
-        const { error: updateError } = await supabase
+        const { data: updatedBooking, error: updateError } = await supabase
             .from('bookings')
             .update({ is_completed: true })
-            .eq('id', id);
+            .eq('id', id)
+            .select()
+            .single();
 
         if (updateError) throw updateError;
 
-        res.json({ message: 'Booking marked as completed' });
+        res.json({ message: 'Booking marked as completed', booking: updatedBooking });
     } catch (error) {
         console.error(error);
         const fs = require('fs');

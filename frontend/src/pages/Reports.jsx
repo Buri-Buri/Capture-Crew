@@ -60,7 +60,7 @@ const Reports = () => {
 
             <div className="card" style={{ marginBottom: '2rem', textAlign: 'center', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', color: 'white' }}>
                 <h3>Total Lifetime Earnings</h3>
-                <p style={{ fontSize: '3rem', fontWeight: 'bold' }}>${totalEarnings.toFixed(2)}</p>
+                <p style={{ fontSize: '3rem', fontWeight: 'bold' }}>৳{totalEarnings.toFixed(2)}</p>
             </div>
 
             <div className="grid" style={{ marginBottom: '2rem' }}>
@@ -71,7 +71,7 @@ const Reports = () => {
                             {Object.entries(earningsByMonth).map(([month, amount]) => (
                                 <li key={month} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid var(--border)' }}>
                                     <span>{month}</span>
-                                    <span style={{ fontWeight: 'bold', color: '#10b981' }}>${amount.toFixed(2)}</span>
+                                    <span style={{ fontWeight: 'bold', color: '#10b981' }}>৳{amount.toFixed(2)}</span>
                                 </li>
                             ))}
                         </ul>
@@ -101,7 +101,7 @@ const Reports = () => {
                                         <td style={{ padding: '1rem' }}>{booking.service_title}</td>
                                         <td style={{ padding: '1rem' }}>{booking.customer_name}</td>
                                         <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 'bold', color: '#10b981' }}>
-                                            ${parseFloat(booking.service_price).toFixed(2)}
+                                            ৳{parseFloat(booking.service_price).toFixed(2)}
                                         </td>
                                     </tr>
                                 ))}
