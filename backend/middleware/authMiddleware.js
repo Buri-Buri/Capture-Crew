@@ -9,8 +9,10 @@ const verifyToken = (req, res, next) => {
 
     try {
         console.log('Verifying token:', token);
-        const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET || 'secret_key_change_this');
+        const tokenString = token.replace('Bearer ', '');
+        const decoded = jwt.verify(tokenString, process.env.JWT_SECRET || 'secret_key_change_this');
         req.user = decoded;
+        req.token = tokenString; // Attach raw token for Supabase calls
         console.log('Token verified, user:', decoded);
         next();
     } catch (error) {

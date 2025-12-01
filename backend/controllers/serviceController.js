@@ -1,4 +1,5 @@
 const supabase = require('../config/supabase');
+const { uploadFileToSupabase } = require('../utils/storage');
 
 const createService = async (req, res) => {
     try {
@@ -30,7 +31,8 @@ const createService = async (req, res) => {
 
         // Handle uploaded files
         if (req.files && req.files.length > 0) {
-            const uploadedUrls = req.files.map(file => `http://localhost:5000/uploads/${file.filename}`);
+            const uploadPromises = req.files.map(file => uploadFileToSupabase(file, 'CaptureCrew', 'services'));
+            const uploadedUrls = await Promise.all(uploadPromises);
             imageUrls = [...imageUrls, ...uploadedUrls];
         }
 

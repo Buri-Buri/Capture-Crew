@@ -67,9 +67,11 @@ const Navbar = () => {
                         <>
                             <Link to={user.role === 'seller' ? "/dashboard" : "/customer-dashboard"} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
                                 {user.profile_picture ? (
-                                    <img src={user.profile_picture} alt="Profile" style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
+                                    <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+                                        <img src={user.profile_picture} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
+                                    </div>
                                 ) : (
-                                    <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>
+                                    <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', flexShrink: 0 }}>
                                         {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
                                     </div>
                                 )}

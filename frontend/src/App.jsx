@@ -11,6 +11,7 @@ import CustomerDashboard from './pages/CustomerDashboard';
 import Messages from './pages/Messages';
 import ProfileSettings from './pages/ProfileSettings';
 import Profile from './pages/Profile';
+import Reports from './pages/Reports';
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -31,6 +32,7 @@ function App() {
             <Route path="/messages" element={<Messages />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/settings" element={<ProfileSettings />} />
+            <Route path="/reports" element={<Reports />} />
           </Routes>
         </div>
       </Router>

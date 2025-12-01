@@ -83,7 +83,7 @@ const ProfileSettings = () => {
                         <img
                             src={preview || user.profile_picture || 'https://via.placeholder.com/150'}
                             alt="Profile"
-                            style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }}
+                            style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center', border: '2px solid var(--primary)' }}
                         />
                         <label htmlFor="file-upload" style={{
                             position: 'absolute', bottom: '0', right: '0',

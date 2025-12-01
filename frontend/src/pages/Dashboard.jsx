@@ -171,7 +171,7 @@ const Dashboard = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{ position: 'relative', width: '50px', height: '50px', borderRadius: '50%', overflow: 'hidden', background: 'var(--muted)', cursor: 'pointer' }}>
                         {user.profile_picture ? (
-                            <img src={user.profile_picture} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={user.profile_picture} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
                         ) : (
                             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📷</div>
                         )}
@@ -208,7 +208,7 @@ const Dashboard = () => {
                             .reduce((sum, b) => sum + (parseFloat(b.service_price) || 0), 0)
                             .toFixed(2)}
                     </p>
-                    <button className="btn btn-outline" style={{ marginTop: '1rem', width: '100%' }}>View Reports</button>
+                    <button onClick={() => navigate('/reports')} className="btn btn-outline" style={{ marginTop: '1rem', width: '100%' }}>View Reports</button>
                 </div>
             </div>
 

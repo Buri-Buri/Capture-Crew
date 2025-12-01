@@ -1,0 +1,80 @@
+{
+  "message": "signature verification failed",
+  "stack": "StorageApiError: signature verification failed\n    at G:\\CaptureCrew\\backend\\node_modules\\@supabase\\storage-js\\dist\\main\\lib\\fetch.js:27:20\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)",
+  "details": {
+    "name": "StorageApiError",
+    "message": "signature verification failed",
+    "status": 400,
+    "statusCode": "403"
+  }
+}
+{
+  "message": "signature verification failed",
+  "stack": "StorageApiError: signature verification failed\n    at G:\\CaptureCrew\\backend\\node_modules\\@supabase\\storage-js\\dist\\main\\lib\\fetch.js:27:20\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)",
+  "details": {
+    "name": "StorageApiError",
+    "message": "signature verification failed",
+    "status": 400,
+    "statusCode": "403"
+  }
+}
+{
+  "message": "signature verification failed",
+  "stack": "StorageApiError: signature verification failed\n    at G:\\CaptureCrew\\backend\\node_modules\\@supabase\\storage-js\\dist\\main\\lib\\fetch.js:27:20\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)",
+  "details": {
+    "name": "StorageApiError",
+    "message": "signature verification failed",
+    "status": 400,
+    "statusCode": "403"
+  }
+}
+{
+  "message": "signature verification failed",
+  "stack": "StorageApiError: signature verification failed\n    at G:\\CaptureCrew\\backend\\node_modules\\@supabase\\storage-js\\dist\\main\\lib\\fetch.js:27:20\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)",
+  "details": {
+    "name": "StorageApiError",
+    "message": "signature verification failed",
+    "status": 400,
+    "statusCode": "403"
+  }
+}
+{
+  "message": "signature verification failed",
+  "stack": "StorageApiError: signature verification failed\n    at G:\\CaptureCrew\\backend\\node_modules\\@supabase\\storage-js\\dist\\main\\lib\\fetch.js:27:20\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)",
+  "details": {
+    "name": "StorageApiError",
+    "message": "signature verification failed",
+    "status": 400,
+    "statusCode": "403"
+  }
+}
+{
+  "message": "signature verification failed",
+  "stack": "StorageApiError: signature verification failed\n    at G:\\CaptureCrew\\backend\\node_modules\\@supabase\\storage-js\\dist\\main\\lib\\fetch.js:27:20\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)",
+  "details": {
+    "name": "StorageApiError",
+    "message": "signature verification failed",
+    "status": 400,
+    "statusCode": "403"
+  }
+}
+{
+  "message": "signature verification failed",
+  "stack": "StorageApiError: signature verification failed\n    at G:\\CaptureCrew\\backend\\node_modules\\@supabase\\storage-js\\dist\\main\\lib\\fetch.js:27:20\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)",
+  "details": {
+    "name": "StorageApiError",
+    "message": "signature verification failed",
+    "status": 400,
+    "statusCode": "403"
+  }
+}
+{
+  "message": "signature verification failed",
+  "stack": "StorageApiError: signature verification failed\n    at G:\\CaptureCrew\\backend\\node_modules\\@supabase\\storage-js\\dist\\main\\lib\\fetch.js:27:20\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)",
+  "details": {
+    "name": "StorageApiError",
+    "message": "signature verification failed",
+    "status": 400,
+    "statusCode": "403"
+  }
+}
