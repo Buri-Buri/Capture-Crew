@@ -8,6 +8,15 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
     const { user, updateUser } = useAuth();
+
+    // Redirect if not logged in
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+        }
+    }, [user, navigate]);
+
+    if (!user) return null; // Prevent rendering until redirect
     const [bookings, setBookings] = useState([]);
     const [services, setServices] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -29,7 +38,12 @@ const Dashboard = () => {
     const fetchBookings = async () => {
         try {
             const data = await getSellerBookings();
-            setBookings(data);
+            if (Array.isArray(data)) {
+                setBookings(data);
+            } else {
+                setBookings([]);
+                console.error('Invalid bookings data:', data);
+            }
         } catch (error) {
             console.error('Error fetching bookings:', error);
             showToast('Failed to load bookings', 'error');

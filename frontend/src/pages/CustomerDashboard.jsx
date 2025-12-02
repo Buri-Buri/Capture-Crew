@@ -25,7 +25,12 @@ const CustomerDashboard = () => {
     const fetchBookings = async () => {
         try {
             const data = await getMyBookings();
-            setBookings(data);
+            if (Array.isArray(data)) {
+                setBookings(data);
+            } else {
+                setBookings([]);
+                console.error('Invalid bookings data:', data);
+            }
             setLoading(false);
         } catch (error) {
             console.error('Error fetching bookings:', error);
