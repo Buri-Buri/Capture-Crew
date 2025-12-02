@@ -176,6 +176,262 @@ const Dashboard = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        try {
+            const data = new FormData();
+            data.append('title', formData.title);
+            data.append('description', formData.description);
+            data.append('price', formData.price);
+            data.append('category', formData.category);
+            data.append('location', formData.location);
+            data.append('image_links', imageLinks);
+
+            imageFiles.forEach((file) => {
+                data.append('images', file);
+            });
+
+            let res;
+            if (editingService) {
+                res = await updateService(editingService.id, data);
+            } else {
+                res = await createService(data);
+            }
+
+            if (res.serviceId || res.message === 'Service updated successfully') {
+                showToast(editingService ? 'Service updated successfully!' : 'Service created successfully!', 'success');
+                setShowModal(false);
+                fetchServices();
+            } else {
+                showToast('Failed to save service', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving service:', error);
+            showToast('Error saving service', 'error');
+        }
+    };
+
+    const handleDeleteService = async (e, serviceId) => {
+        e.stopPropagation();
+        if (!window.confirm('Are you sure you want to delete this service? This action cannot be undone.')) return;
+        try {
+            await deleteService(serviceId);
+            showToast('Service deleted successfully', 'success');
+            fetchServices();
+        } catch (error) {
+            console.error('Error deleting service:', error);
+            showToast('Failed to delete service', 'error');
+        }
+    };
+
+    const handleDeleteImage = async (imageUrl) => {
+        if (!window.confirm('Delete this image?')) return;
+        try {
+            await deleteServiceImage(editingService.id, imageUrl);
+            showToast('Image deleted', 'success');
+            setEditingService(prev => ({
+                ...prev,
+                images: prev.images.filter(img => img !== imageUrl)
+            }));
+            fetchServices();
+        } catch (error) {
+            console.error('Error deleting image:', error);
+            showToast('Failed to delete image', 'error');
+        }
+    };
+
+    return (
+        <div className="dashboard container" style={{ paddingTop: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h1>Seller Dashboard</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ position: 'relative', width: '50px', height: '50px', borderRadius: '50%', overflow: 'hidden', background: 'var(--muted)', cursor: 'pointer' }}>
+                        {user.profile_picture ? (
+                            <img src={user.profile_picture} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
+                        ) : (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📷</div>
+                        )}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleProfilePicUpload}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
+                            title="Upload Profile Picture"
+                        />
+                    </div>
+                    <button className="btn btn-primary" onClick={() => openModal()}>+ Add Service</button>
+                </div>
+            </div>
+
+            <div className="grid">
+                <div className="card">
+                    <h3>My Services</h3>
+                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#6366f1' }}>{services.length}</p>
+                    <button onClick={() => openModal()} className="btn btn-primary" style={{ marginTop: '1rem', width: '100%' }}>+ Add Service</button>
+                </div>
+                <div className="card">
+                    <h3>Active Bookings</h3>
+                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ec4899' }}>
+                        {bookings.filter(b => b.status === 'accepted' && !b.is_completed).length}
+                    </p>
+                    <button onClick={scrollToBookings} className="btn btn-outline" style={{ marginTop: '1rem', width: '100%' }}>View All</button>
+                </div>
+                <div className="card">
+                    <h3>Total Earnings</h3>
+                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
+                        ৳{bookings
+                            .filter(b => b.payment_status === 'paid')
+                            .reduce((sum, b) => sum + (parseFloat(b.service_price) || 0), 0)
+                            .toFixed(2)}
+                    </p>
+                    <button onClick={() => navigate('/reports')} className="btn btn-outline" style={{ marginTop: '1rem', width: '100%' }}>View Reports</button>
+                </div>
+            </div>
+
+            <div id="recent-bookings" style={{ marginTop: '3rem' }}>
+                <h3>Recent Bookings</h3>
+                {bookings.length > 0 ? (
+                    <div className="grid" style={{ marginTop: '1rem' }}>
+                        {bookings.map((booking) => (
+                            <div key={booking.id} className="card">
+                                <h4>{booking.service_title}</h4>
+                                <p style={{ color: '#94a3b8' }}>Booked by: {booking.customer_name}</p>
+                                <p>Date: {new Date(booking.booking_date).toLocaleDateString()}</p>
+                                <p>Contact: {booking.contact_info || 'N/A'}</p>
+                                <p>Location: {booking.location || 'N/A'}</p>
+                                <p>Price: ৳{booking.service_price}</p>
+                                <p>Status:
+                                    <span style={{
+                                        color: booking.is_completed ? '#10b981' :
+                                            booking.payment_status === 'paid' ? '#f59e0b' :
+                                                booking.status === 'accepted' ? '#10b981' :
+                                                    booking.status === 'rejected' ? '#ef4444' : '#fbbf24',
+                                        fontWeight: 'bold',
+                                        marginLeft: '0.5rem'
+                                    }}>
+                                        {booking.is_completed ? 'Completed' :
+                                            booking.payment_status === 'paid' ? 'Paid' :
+                                                booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                    </span>
+                                </p>
+
+                                {booking.status === 'pending' && (
+                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        <button onClick={() => handleStatusUpdate(booking.id, 'accepted')} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Accept</button>
+                                        <button onClick={() => handleStatusUpdate(booking.id, 'rejected')} className="btn btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', borderColor: '#ef4444', color: '#ef4444' }}>Reject</button>
+                                        <button onClick={() => navigate('/messages', { state: { sellerId: booking.customer_id, sellerName: booking.customer_name } })} className="btn btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Message Buyer</button>
+                                    </div>
+                                )}
+
+                                {(booking.status === 'accepted' || booking.status === 'completed' || booking.is_completed) && (
+                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        {!booking.is_completed && (
+                                            <button onClick={() => handleComplete(booking.id)} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', background: '#10b981', borderColor: '#10b981' }}>Complete Booking</button>
+                                        )}
+                                        {booking.is_completed && booking.payment_status === 'pending' && (
+                                            <button onClick={() => handlePayment(booking.id, 'paid')} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', background: '#f59e0b', borderColor: '#f59e0b' }}>Mark Paid</button>
+                                        )}
+                                        <button onClick={() => navigate('/messages', { state: { sellerId: booking.customer_id, sellerName: booking.customer_name } })} className="btn btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Message Buyer</button>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="card" style={{ marginTop: '1rem', textAlign: 'center', color: '#94a3b8' }}>
+                        No bookings yet.
+                    </div>
+                )}
+            </div>
+
+            <div style={{ marginTop: '3rem' }}>
+                <h3>My Service Listings</h3>
+                {services.length === 0 ? (
+                    <div className="card" style={{ marginTop: '1rem', textAlign: 'center', color: '#94a3b8' }}>
+                        No services added yet. Click "+ Add Service" to get started.
+                    </div>
+                ) : (
+                    <div className="grid" style={{ marginTop: '1rem' }}>
+                        {services.map((service) => (
+                            <div
+                                key={service.id}
+                                className="card"
+                                onClick={() => navigate(`/service/${service.id}`)}
+                                style={{ cursor: 'pointer', transition: 'transform 0.2s', position: 'relative' }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                            >
+                                {service.images && service.images.length > 0 ? (
+                                    <div style={{ display: 'flex', overflowX: 'auto', gap: '0.5rem', marginBottom: '1rem', paddingBottom: '0.5rem' }}>
+                                        {service.images.map((img, index) => (
+                                            <img key={index} src={img} alt={`${service.title} ${index + 1}`} style={{ height: '150px', objectFit: 'contain', borderRadius: '0.5rem' }} />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    service.image_url && <img src={service.image_url} alt={service.title} style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '0.5rem', marginBottom: '1rem' }} />
+                                )}
+                                <h4>{service.title}</h4>
+                                <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{service.category}</p>
+                                <p style={{ fontWeight: 'bold', marginTop: '0.5rem' }}>৳{service.price}</p>
+
+                                <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); openModal(service); }}
+                                        className="btn btn-outline"
+                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={(e) => handleDeleteService(e, service.id)}
+                                        className="btn btn-outline"
+                                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', borderColor: '#ef4444', color: '#ef4444' }}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {
+                showModal && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                        backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000
+                    }}>
+                        <div className="card" style={{ width: '100%', maxWidth: '500px', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
+                            <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+                            <h3 style={{ marginBottom: '1.5rem' }}>{editingService ? 'Edit Service' : 'Add New Service'}</h3>
+                            <form onSubmit={handleSubmit}>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Service Title</label>
+                                    <input type="text" name="title" value={formData.title} onChange={handleChange} required style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
+                                </div>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Category</label>
+                                    <select name="category" value={formData.category} onChange={handleChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }}>
+                                        <option>Photography</option>
+                                        <option>Videography</option>
+                                        <option>Event Planning</option>
+                                        <option>Decoration</option>
+                                    </select>
+                                </div>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Price (৳)</label>
+                                    <input type="number" name="price" value={formData.price} onChange={handleChange} required style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
+                                </div>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Location</label>
+                                    <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="e.g., Dhaka, Chittagong" style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
+                                </div>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Description</label>
+                                    <textarea name="description" value={formData.description} onChange={handleChange} rows="3" style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }}></textarea>
+                                </div>
+
+                                {editingService && editingService.images && editingService.images.length > 0 && (
+                                    <div style={{ marginBottom: '1rem' }}>
                                         <label style={{ display: 'block', marginBottom: '0.5rem' }}>Current Images</label>
                                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                             {editingService.images.map((img, idx) => (
@@ -191,7 +447,7 @@ const Dashboard = () => {
                                                 </div>
                                             ))}
                                         </div>
-                                    </div >
+                                    </div>
                                 )}
 
                                 <div style={{ marginBottom: '1rem' }}>
@@ -203,12 +459,12 @@ const Dashboard = () => {
                                     <input type="text" value={imageLinks} onChange={(e) => setImageLinks(e.target.value)} placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg" style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #334155', background: '#0f172a', color: 'white' }} />
                                 </div>
                                 <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>{editingService ? 'Update Service' : 'Create Service'}</button>
-                            </form >
-                        </div >
-                    </div >
+                            </form>
+                        </div>
+                    </div>
                 )
             }
-        </div >
+        </div>
     );
 };
 
