@@ -191,7 +191,15 @@ const ServiceDetails = () => {
                         if (user && user.role === 'seller') {
                             return <div style={{ padding: '1rem', background: 'var(--muted)', textAlign: 'center', borderRadius: '0.5rem' }}>Sellers cannot book services</div>;
                         }
-                        return <button onClick={() => setShowBooking(true)} className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.125rem' }}>Book Now</button>;
+                        return <button onClick={() => {
+                            const token = localStorage.getItem('token');
+                            if (!token) {
+                                showToast('Please login to book a service', 'info');
+                                navigate('/login');
+                                return;
+                            }
+                            setShowBooking(true);
+                        }} className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.125rem' }}>Book Now</button>;
                     })()}
                 </div>
             </div>

@@ -4,15 +4,15 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
 
 ## Features
 
--   **Service Discovery**: Browse and search for professionals by category (Photography, Videography, Event Planning) and price.
+-   **Service Discovery**: Browse and search for professionals by category (Photography, Videography, Event Planning) and price (in **BDT ৳**).
 -   **Detailed Profiles**: View comprehensive service details, including pricing, descriptions, and portfolio images.
--   **Booking System**: Seamless booking flow with date selection and status tracking (Pending, Accepted, Rejected).
--   **Reviews & Ratings**: Customers can leave reviews and ratings for services they've booked.
+-   **Booking System**: Seamless booking flow with date selection and status tracking (Pending, Accepted, Rejected, Completed).
+-   **Reviews & Ratings**: Customers can leave reviews and ratings for completed services.
 -   **User Accounts**:
     -   **Secure Authentication**: Email/Password login via Supabase.
     -   **Role-Based Access**:
-        -   **Customers**: Book services, leave reviews, view booking history.
-        -   **Sellers**: Create services, manage bookings, view earnings reports.
+        -   **Customers**: Book services, leave reviews, view booking history, message providers.
+        -   **Sellers**: Create services, manage bookings, view earnings reports, message clients.
         -   **Restrictions**: Sellers cannot book services or message other sellers.
     -   **Profile Management**: Upload profile pictures and manage account details.
 -   **Real-time Messaging**: Chat directly with professionals or clients to discuss booking details.
@@ -70,6 +70,25 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
         ```bash
         npm run dev
         ```
+
+## Deployment
+
+### Backend (Render)
+1.  Push your code to GitHub.
+2.  Create a new **Web Service** on [Render](https://render.com).
+3.  Connect your GitHub repository.
+4.  **Build Command**: `npm install`
+5.  **Start Command**: `node server.js`
+6.  **Root Directory**: `backend`
+7.  **Environment Variables**: Add the same variables as your local `.env` (`SUPABASE_URL`, `SUPABASE_KEY`, `JWT_SECRET`).
+
+### Frontend (Netlify)
+1.  Create a new site on [Netlify](https://netlify.com) from Git.
+2.  **Build Command**: `npm run build`
+3.  **Publish Directory**: `dist`
+4.  **Base Directory**: `frontend`
+5.  **Environment Variables**:
+    -   `VITE_API_URL`: Your Render Backend URL (e.g., `https://your-app.onrender.com/api`) - **Don't forget the `/api` suffix!**
 
 ## Database Setup
 

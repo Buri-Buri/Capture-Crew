@@ -87,6 +87,15 @@ const Services = () => {
                                 className="btn btn-primary"
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    const token = localStorage.getItem('token');
+                                    if (!token) {
+                                        // showToast('Please login to book a service', 'info'); // useToast not imported yet, will fix in next step or just navigate
+                                        // Actually, let's just navigate for now to be safe, or I need to import useToast first.
+                                        // Let's do the import in a separate block or use window.location if I can't import easily.
+                                        // Better: I will add the import in a separate edit. For now, I'll use the existing navigate.
+                                        navigate('/login');
+                                        return;
+                                    }
                                     openBookingModal(service.id);
                                 }}
                             >
