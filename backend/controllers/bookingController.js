@@ -216,7 +216,7 @@ const completeBooking = async (req, res) => {
 
         const { data: updatedBooking, error: updateError } = await supabase
             .from('bookings')
-            .update({ is_completed: true })
+            .update({ is_completed: true, status: 'completed' })
             .eq('id', id)
             .select()
             .single();
