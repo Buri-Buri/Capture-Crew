@@ -122,7 +122,7 @@ const CustomerDashboard = () => {
                         <div key={booking.id} className="card" style={{ position: 'relative' }}>
                             <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
                                 <span style={{
-                                    backgroundColor: getStatusColor(booking.status),
+                                    backgroundColor: getStatusColor(booking.is_completed ? 'completed' : booking.status),
                                     color: 'white',
                                     padding: '0.25rem 0.75rem',
                                     borderRadius: '9999px',
@@ -130,7 +130,7 @@ const CustomerDashboard = () => {
                                     fontWeight: '600',
                                     textTransform: 'capitalize'
                                 }}>
-                                    {booking.status}
+                                    {booking.is_completed ? 'completed' : booking.status}
                                 </span>
                             </div>
                             <h3 style={{ paddingRight: '4rem' }}>{booking.service_title}</h3>
@@ -148,7 +148,7 @@ const CustomerDashboard = () => {
                                 Message Provider
                             </button>
 
-                            {booking.status === 'completed' && (
+                            {(booking.status === 'completed' || booking.is_completed) && (
                                 <button
                                     className="btn btn-outline"
                                     style={{ marginTop: '1.5rem', width: '100%' }}
