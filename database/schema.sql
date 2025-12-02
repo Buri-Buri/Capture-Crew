@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS public.bookings (
     booking_date DATE NOT NULL,
     contact_info TEXT,
     location TEXT,
-    status TEXT CHECK (status IN ('pending', 'accepted', 'rejected')) DEFAULT 'pending',
+    status TEXT CHECK (status IN ('pending', 'accepted', 'rejected', 'completed')) DEFAULT 'pending',
     payment_status TEXT CHECK (payment_status IN ('pending', 'paid')) DEFAULT 'pending',
     is_completed BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()

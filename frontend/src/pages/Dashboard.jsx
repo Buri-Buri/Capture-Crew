@@ -260,7 +260,7 @@ const Dashboard = () => {
                                     </div>
                                 )}
 
-                                {booking.status === 'accepted' && (
+                                {(booking.status === 'accepted' || booking.status === 'completed' || booking.is_completed) && (
                                     <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                         {!booking.is_completed && (
                                             <button onClick={() => handleComplete(booking.id)} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', background: '#10b981', borderColor: '#10b981' }}>Complete Booking</button>
