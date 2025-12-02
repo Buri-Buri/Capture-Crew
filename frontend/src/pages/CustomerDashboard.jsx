@@ -79,8 +79,8 @@ const CustomerDashboard = () => {
 
     if (loading) return <div className="container" style={{ paddingTop: '100px', textAlign: 'center' }}>Loading...</div>;
 
-    const activeBookings = bookings.filter(b => b.status === 'accepted' || b.status === 'pending').length;
-    const completedBookings = bookings.filter(b => b.status === 'completed').length;
+    const activeBookings = bookings.filter(b => (b.status === 'accepted' || b.status === 'pending') && !b.is_completed).length;
+    const completedBookings = bookings.filter(b => b.status === 'completed' || b.is_completed).length;
 
     return (
         <div className="container" style={{ paddingTop: '100px', paddingBottom: '4rem' }}>

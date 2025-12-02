@@ -79,7 +79,7 @@ const getServiceReviews = async (req, res) => {
                 *,
                 bookings (
                     customer_id,
-                    users:customer_id (username, profile_picture)
+                    users (username, profile_picture)
                 )
             `)
             .in('booking_id', bookingIds)
