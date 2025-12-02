@@ -3,7 +3,7 @@ const { uploadFileToSupabase } = require('../utils/storage');
 
 const createService = async (req, res) => {
     try {
-        const { title, description, price, category, image_links } = req.body;
+        const { title, description, price, category, location, image_links } = req.body;
         const seller_id = req.user.id;
 
         if (!title || !description || !price || !category) {
@@ -18,7 +18,8 @@ const createService = async (req, res) => {
                 title,
                 description,
                 price,
-                category
+                category,
+                location
             }])
             .select()
             .single();
@@ -233,4 +234,121 @@ const deleteServiceImage = async (req, res) => {
     }
 };
 
-module.exports = { createService, getMyServices, getAllServices, deleteServiceImage };
+const updateService = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, price, category, location, image_links } = req.body;
+        const seller_id = req.user.id;
+
+        // Verify ownership
+        const { data: service, error: serviceError } = await supabase
+            .from('services')
+            .select('seller_id')
+            .eq('id', id)
+            .single();
+
+        if (serviceError || !service) {
+            return res.status(404).json({ message: 'Service not found' });
+        }
+
+        if (service.seller_id !== seller_id) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
+
+        // Update service details
+        const { error: updateError } = await supabase
+            .from('services')
+            .update({
+                title,
+                description,
+                price,
+                category,
+                location
+            })
+            .eq('id', id);
+
+        if (updateError) throw updateError;
+
+        // Collect new image URLs
+        let imageUrls = [];
+
+        // Handle uploaded files
+        if (req.files && req.files.length > 0) {
+            const uploadPromises = req.files.map(file => uploadFileToSupabase(file, 'CaptureCrew', 'services'));
+            const uploadedUrls = await Promise.all(uploadPromises);
+            imageUrls = [...imageUrls, ...uploadedUrls];
+        }
+
+        // Handle image links
+        if (image_links) {
+            const links = image_links.split(',').map(link => link.trim()).filter(link => link);
+            imageUrls = [...imageUrls, ...links];
+        }
+
+        // Insert new images into service_images
+        if (imageUrls.length > 0) {
+            const imageRecords = imageUrls.map(url => ({ service_id: id, image_url: url }));
+            const { error: imagesError } = await supabase
+                .from('service_images')
+                .insert(imageRecords);
+
+            if (imagesError) throw imagesError;
+
+            // If main image is missing, update it
+            const { data: currentService } = await supabase
+                .from('services')
+                .select('image_url')
+                .eq('id', id)
+                .single();
+
+            if (!currentService.image_url) {
+                await supabase
+                    .from('services')
+                    .update({ image_url: imageUrls[0] })
+                    .eq('id', id);
+            }
+        }
+
+        res.json({ message: 'Service updated successfully' });
+    } catch (error) {
+        console.error('Update Service Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+const deleteService = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const seller_id = req.user.id;
+
+        // Verify ownership
+        const { data: service, error: serviceError } = await supabase
+            .from('services')
+            .select('seller_id')
+            .eq('id', id)
+            .single();
+
+        if (serviceError || !service) {
+            return res.status(404).json({ message: 'Service not found' });
+        }
+
+        if (service.seller_id !== seller_id) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
+
+        // Delete service (Cascade will handle images and bookings)
+        const { error: deleteError } = await supabase
+            .from('services')
+            .delete()
+            .eq('id', id);
+
+        if (deleteError) throw deleteError;
+
+        res.json({ message: 'Service deleted successfully' });
+    } catch (error) {
+        console.error('Delete Service Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { createService, getMyServices, getAllServices, deleteServiceImage, updateService, deleteService };

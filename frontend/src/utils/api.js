@@ -78,6 +78,27 @@ export const getMyBookings = async () => {
     return response.json();
 };
 
+export const updateService = async (id, formData) => {
+    const response = await fetch(`${API_URL}/services/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+    });
+    return response.json();
+};
+
+export const deleteService = async (id) => {
+    const response = await fetch(`${API_URL}/services/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+    return response.json();
+};
+
 export const getSellerBookings = async () => {
     const response = await fetch(`${API_URL}/bookings/seller-bookings`, {
         method: 'GET',
