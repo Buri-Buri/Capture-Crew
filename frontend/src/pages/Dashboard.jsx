@@ -53,7 +53,12 @@ const Dashboard = () => {
     const fetchServices = async () => {
         try {
             const data = await getMyServices();
-            setServices(data);
+            if (Array.isArray(data)) {
+                setServices(data);
+            } else {
+                setServices([]);
+                console.error('Invalid services data:', data);
+            }
         } catch (error) {
             console.error('Error fetching services:', error);
             showToast('Failed to load services', 'error');
