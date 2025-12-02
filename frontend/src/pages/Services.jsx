@@ -83,24 +83,29 @@ const Services = () => {
                         <p style={{ marginTop: '0.5rem' }}>{service.description}</p>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
                             <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#6366f1' }}>৳{service.price}</span>
-                            <button
-                                className="btn btn-primary"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    const token = localStorage.getItem('token');
-                                    if (!token) {
-                                        // showToast('Please login to book a service', 'info'); // useToast not imported yet, will fix in next step or just navigate
-                                        // Actually, let's just navigate for now to be safe, or I need to import useToast first.
-                                        // Let's do the import in a separate block or use window.location if I can't import easily.
-                                        // Better: I will add the import in a separate edit. For now, I'll use the existing navigate.
-                                        navigate('/login');
-                                        return;
-                                    }
-                                    openBookingModal(service.id);
-                                }}
-                            >
-                                Book Now
-                            </button>
+                            {(() => {
+                                const userStr = localStorage.getItem('user');
+                                const user = userStr ? JSON.parse(userStr) : null;
+                                if (user && user.role === 'seller') {
+                                    return null;
+                                }
+                                return (
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const token = localStorage.getItem('token');
+                                            if (!token) {
+                                                navigate('/login');
+                                                return;
+                                            }
+                                            openBookingModal(service.id);
+                                        }}
+                                    >
+                                        Book Now
+                                    </button>
+                                );
+                            })()}
                         </div>
                     </div>
                 ))}
