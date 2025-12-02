@@ -40,6 +40,7 @@ const getUserBookings = async (req, res) => {
                 *,
                 services (
                     title,
+                    price,
                     image_url,
                     seller_id,
                     users (
@@ -56,6 +57,7 @@ const getUserBookings = async (req, res) => {
         const formattedBookings = data.map(booking => ({
             ...booking,
             service_title: booking.services?.title,
+            total_price: booking.services?.price,
             image_url: booking.services?.image_url,
             seller_name: booking.services?.users?.username,
             seller_id: booking.services?.seller_id
