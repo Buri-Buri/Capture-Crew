@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { loginUser } from '../utils/api';
+import { loginUser, API_URL } from '../utils/api';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -87,6 +87,9 @@ const Login = () => {
                 <p style={{ marginTop: '1.5rem', textAlign: 'center', color: '#94a3b8' }}>
                     Don't have an account? <Link to="/register" style={{ color: '#6366f1' }}>Sign up</Link>
                 </p>
+            </div>
+            <div style={{ marginTop: '2rem', textAlign: 'center', color: '#64748b', fontSize: '0.8rem' }}>
+                Debug: API URL is {API_URL}
             </div>
         </div>
     );
