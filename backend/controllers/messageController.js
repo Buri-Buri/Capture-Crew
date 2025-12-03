@@ -34,6 +34,19 @@ const sendMessage = async (req, res) => {
 
         if (error) throw error;
 
+        // Create notification for receiver
+        await supabase
+            .from('notifications')
+            .insert([
+                {
+                    user_id: receiver_id,
+                    type: 'message',
+                    content: `New message from user ${sender_id}`, // Ideally fetch username, but ID is faster for now
+                    related_id: sender_id, // Link to sender so we can navigate to conversation
+                    is_read: false
+                }
+            ]);
+
         res.status(201).json({ message: 'Message sent' });
     } catch (error) {
         console.error('Error sending message:', error);

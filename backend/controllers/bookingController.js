@@ -23,6 +23,31 @@ const createBooking = async (req, res) => {
 
         if (error) throw error;
 
+        // Notify seller
+        // First get service details to know the seller (already have it? No, need to fetch or trust input? 
+        // Wait, createBooking takes service_id. We need to find the seller_id from service_id.
+        // The original code didn't fetch seller_id explicitly to return it, but we need it for notification.
+
+        const { data: serviceData } = await supabase
+            .from('services')
+            .select('seller_id, title')
+            .eq('id', service_id)
+            .single();
+
+        if (serviceData) {
+            await supabase
+                .from('notifications')
+                .insert([
+                    {
+                        user_id: serviceData.seller_id,
+                        type: 'booking_request',
+                        content: `New booking request for ${serviceData.title}`,
+                        related_id: data.id,
+                        is_read: false
+                    }
+                ]);
+        }
+
         res.status(201).json({ message: 'Booking created successfully', bookingId: data.id });
     } catch (error) {
         console.error(error);
@@ -144,6 +169,28 @@ const updateBookingStatus = async (req, res) => {
 
         if (updateError) throw updateError;
 
+        // Notify customer
+        // booking object has services!inner(seller_id), but we need customer_id.
+        // We should fetch customer_id from the booking we just updated or the one we fetched.
+        // The initial fetch didn't select customer_id. Let's update the select.
+
+        // Re-fetch or use the updatedBooking if it returns customer_id. 
+        // The update returns 'select()', so it should return all fields including customer_id.
+
+        if (updatedBooking) {
+            await supabase
+                .from('notifications')
+                .insert([
+                    {
+                        user_id: updatedBooking.customer_id,
+                        type: 'booking_update',
+                        content: `Your booking status has been updated to ${status}`,
+                        related_id: updatedBooking.id,
+                        is_read: false
+                    }
+                ]);
+        }
+
         res.json({ message: 'Booking status updated', booking: updatedBooking });
     } catch (error) {
         console.error(error);
@@ -224,6 +271,21 @@ const completeBooking = async (req, res) => {
             .single();
 
         if (updateError) throw updateError;
+
+        // Notify customer
+        if (updatedBooking) {
+            await supabase
+                .from('notifications')
+                .insert([
+                    {
+                        user_id: updatedBooking.customer_id,
+                        type: 'booking_update',
+                        content: `Your booking has been marked as completed`,
+                        related_id: updatedBooking.id,
+                        is_read: false
+                    }
+                ]);
+        }
 
         res.json({ message: 'Booking marked as completed', booking: updatedBooking });
     } catch (error) {

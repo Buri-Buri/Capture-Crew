@@ -31,6 +31,7 @@ app.use('/api/reviews', (req, res, next) => {
     fs.appendFileSync('server_debug.log', `Server: Request received for /api/reviews ${req.method} ${req.url}\n`);
     next();
 }, require('./routes/reviewRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 app.get('/', (req, res) => {
     res.send('CaptureCrew API is running');
