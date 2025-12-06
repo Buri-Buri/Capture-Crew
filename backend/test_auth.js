@@ -31,8 +31,8 @@ const testAuth = async () => {
     try {
         console.log('Testing Registration...');
         const regData = JSON.stringify({
-            username: 'testuser_' + Date.now(),
-            email: 'test_' + Date.now() + '@example.com',
+            username: 'test_fixed_user',
+            email: 'test_fixed@example.com',
             password: 'password123',
             role: 'customer'
         });

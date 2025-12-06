@@ -23,16 +23,18 @@ const Navbar = () => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [toast, setToast] = useState(null);
+    const [lastNotificationId, setLastNotificationId] = useState(null);
 
     useEffect(() => {
         if (user) {
-            fetchNotifications();
-            const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+            fetchNotifications(true); // First fetch
+            const interval = setInterval(() => fetchNotifications(false), 5000); // Poll every 5 seconds
             return () => clearInterval(interval);
         }
     }, [user]);
 
-    const fetchNotifications = async () => {
+    const fetchNotifications = async (isFirstLoad = false) => {
         try {
             const token = localStorage.getItem('token');
             if (!token) return;
@@ -47,6 +49,23 @@ const Navbar = () => {
                 const data = await response.json();
                 setNotifications(data);
                 setUnreadCount(data.filter(n => !n.is_read).length);
+
+                if (data.length > 0) {
+                    const latest = data[0];
+                    // On first load, just set the ID. On subsequent polls, check if ID changed.
+                    if (!isFirstLoad && lastNotificationId && latest.id !== lastNotificationId && !latest.is_read) {
+                        setToast({
+                            message: latest.content,
+                            type: 'info', // You can map 'booking_request' -> 'success' etc if desired
+                            id: latest.id // Pass ID to handle click
+                        });
+
+                        // Optional: Play a sound
+                        const audio = new Audio('/notification.mp3'); // Ensure this file exists or remove
+                        audio.play().catch(e => console.log('Audio play failed', e)); // Catch interaction errors
+                    }
+                    setLastNotificationId(latest.id);
+                }
             }
         } catch (error) {
             console.error('Error fetching notifications:', error);
@@ -71,13 +90,10 @@ const Navbar = () => {
             }
 
             setShowNotifications(false);
+            setToast(null); // Close toast if clicked
 
             // Navigate based on type
             if (notification.type === 'message') {
-                // Navigate to messages with the user
-                // We need to know which user sent it. related_id is the sender_id
-                // But /messages page might need to be structured to open a specific convo
-                // For now, just go to /messages
                 navigate('/messages');
             } else if (notification.type === 'booking_request' || notification.type === 'booking_update') {
                 if (user.role === 'seller') {
@@ -110,6 +126,43 @@ const Navbar = () => {
 
     return (
         <nav className="navbar">
+            {toast && (
+                <div style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 10000 }}>
+                    <div
+                        onClick={() => {
+                            // Find the full notification object for the toast
+                            const notification = notifications.find(n => n.id === toast.id);
+                            if (notification) handleNotificationClick(notification);
+                            else setToast(null);
+                        }}
+                        style={{
+                            background: isDark ? '#1f2937' : 'white',
+                            color: isDark ? 'white' : 'black',
+                            padding: '16px',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                            borderLeft: '4px solid #3B82F6',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            minWidth: '300px',
+                            animation: 'slideIn 0.3s ease-out'
+                        }}
+                    >
+                        <div>
+                            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>New Notification</div>
+                            <div style={{ fontSize: '0.9rem' }}>{toast.message}</div>
+                        </div>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setToast(null); }}
+                            style={{ background: 'none', border: 'none', marginLeft: '10px', cursor: 'pointer', fontSize: '1.2rem', color: 'inherit', opacity: 0.7 }}
+                        >
+                            &times;
+                        </button>
+                    </div>
+                </div>
+            )}
             <div className="container nav-content">
                 <Link to="/" className="logo">
                     <img src={logo} alt="CaptureCrew" style={{ height: '40px', width: 'auto' }} />
