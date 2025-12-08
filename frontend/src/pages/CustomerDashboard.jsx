@@ -63,14 +63,19 @@ const CustomerDashboard = () => {
         if (!selectedBooking) return;
 
         try {
-            await addReview({
-                service_id: selectedBooking.service_id,
+            const response = await addReview({
+                bookingId: selectedBooking.id, // Corrected from service_id to bookingId
                 rating: parseInt(rating),
                 comment
             });
-            showToast('Review submitted successfully!', 'success');
-            setShowReviewModal(false);
-            // Optionally refresh bookings or update UI to show review is submitted
+
+            if (response.review) {
+                showToast('Review submitted successfully!', 'success');
+                setShowReviewModal(false);
+                // Optionally refresh bookings to hide the "Leave a Review" button or mark as reviewed
+            } else {
+                showToast(response.message || 'Failed to submit review', 'error');
+            }
         } catch (error) {
             console.error('Error submitting review:', error);
             showToast(error.message || 'Failed to submit review', 'error');
