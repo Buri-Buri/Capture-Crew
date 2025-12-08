@@ -21,30 +21,24 @@ const Messages = () => {
     // Handle redirect from other pages (e.g., "Message Seller")
     useEffect(() => {
         if (location.state && location.state.sellerId) {
-            // Check if conversation exists, if not, create a temp one or select it
-            const sellerId = location.state.sellerId;
-            // Ideally, we should fetch conversations and find this user.
-            // For now, let's assume we can just set activeChat if we have the details.
-            // But we need the user object.
-            // Let's rely on fetchConversations finding it, or if it's a new chat, we might need to handle that.
-            // A simpler way: If we have sellerId, we can fetch messages directly even if no conversation exists yet?
-            // But getMessages needs userId.
-            // Let's just set activeChat with minimal info if not found in list.
-            if (location.state.sellerName) {
-                setActiveChat({
-                    id: sellerId,
-                    username: location.state.sellerName,
-                    profile_picture: location.state.sellerImage
-                });
-            }
+            const { sellerId, sellerName, sellerImage, bookingId, serviceTitle } = location.state;
+
+            // Set active chat immediately with potential booking context
+            setActiveChat({
+                id: sellerId,
+                username: sellerName,
+                profile_picture: sellerImage,
+                booking_id: bookingId,
+                booking_title: serviceTitle || 'General Inquiry'
+            });
         }
     }, [location.state]);
 
     // Fetch messages when active chat changes
     useEffect(() => {
         if (activeChat) {
-            fetchMessages(activeChat.id);
-            const interval = setInterval(() => fetchMessages(activeChat.id), 3000); // Poll messages every 3s
+            fetchMessages(activeChat.id, activeChat.booking_id);
+            const interval = setInterval(() => fetchMessages(activeChat.id, activeChat.booking_id), 3000); // Poll messages every 3s
             return () => clearInterval(interval);
         }
     }, [activeChat]);
@@ -63,9 +57,9 @@ const Messages = () => {
         }
     };
 
-    const fetchMessages = async (userId) => {
+    const fetchMessages = async (userId, bookingId) => {
         try {
-            const data = await getMessages(userId);
+            const data = await getMessages(userId, bookingId);
             setMessages(data);
         } catch (error) {
             console.error('Error fetching messages:', error);
@@ -79,10 +73,11 @@ const Messages = () => {
         try {
             await sendMessage({
                 receiver_id: activeChat.id,
-                content: newMessage
+                content: newMessage,
+                booking_id: activeChat.booking_id
             });
             setNewMessage('');
-            fetchMessages(activeChat.id);
+            fetchMessages(activeChat.id, activeChat.booking_id);
             fetchConversations(); // Update last message in list
         } catch (error) {
             console.error('Error sending message:', error);
@@ -99,19 +94,25 @@ const Messages = () => {
                 <div style={{ flex: 1, overflowY: 'auto' }}>
                     {conversations.map(conv => (
                         <div
-                            key={conv.id}
-                            onClick={() => setActiveChat(conv)}
+                            key={conv.key || conv.id} // Use key from backend (userId_bookingId)
+                            onClick={() => setActiveChat({
+                                id: conv.other_user_id || conv.id, // Handle both old/new format just in case
+                                username: conv.username,
+                                profile_picture: conv.profile_picture,
+                                booking_id: conv.booking_id,
+                                booking_title: conv.booking_title
+                            })}
                             style={{
                                 padding: '1rem',
                                 borderBottom: '1px solid var(--border)',
                                 cursor: 'pointer',
-                                background: activeChat?.id === conv.id ? 'var(--muted)' : 'transparent',
+                                background: (activeChat?.id === conv.other_user_id && activeChat?.booking_id === conv.booking_id) ? 'var(--muted)' : 'transparent',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.75rem'
                             }}
                         >
-                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', background: '#ccc' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', background: '#ccc', flexShrink: 0 }}>
                                 {conv.profile_picture ? (
                                     <img src={conv.profile_picture} alt={conv.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 ) : (
@@ -121,7 +122,19 @@ const Messages = () => {
                                 )}
                             </div>
                             <div style={{ flex: 1, overflow: 'hidden' }}>
-                                <div style={{ fontWeight: 'bold' }}>{conv.username}</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                    <span style={{ fontWeight: 'bold' }}>{conv.username}</span>
+                                    {conv.booking_title && (
+                                        <span style={{ fontSize: '0.65rem', color: 'var(--primary)', border: '1px solid var(--primary)', borderRadius: '4px', padding: '0 4px' }}>
+                                            {conv.booking_id ? 'Order' : 'General'}
+                                        </span>
+                                    )}
+                                </div>
+                                {conv.booking_title && (
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--foreground)', opacity: 0.8, marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {conv.booking_title}
+                                    </div>
+                                )}
                                 <div style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {conv.last_message}
                                 </div>
@@ -150,7 +163,14 @@ const Messages = () => {
                                     </div>
                                 )}
                             </div>
-                            <h3 style={{ margin: 0 }}>{activeChat.username}</h3>
+                            <div>
+                                <h3 style={{ margin: 0 }}>{activeChat.username}</h3>
+                                {activeChat.booking_title && (
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)' }}>
+                                        {activeChat.booking_title}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

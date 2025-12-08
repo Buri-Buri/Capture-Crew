@@ -65,14 +65,15 @@ const getConversations = async (req, res) => {
             .select(`
                 *,
                 sender:users!sender_id(id, username, profile_picture),
-                receiver:users!receiver_id(id, username, profile_picture)
+                receiver:users!receiver_id(id, username, profile_picture),
+                bookings:booking_id(id, services(title))
             `)
             .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        // Process messages to find unique conversations and latest message
+        // Process messages to find unique conversations (User + Booking)
         const conversationsMap = new Map();
 
         messages.forEach(msg => {
@@ -80,15 +81,22 @@ const getConversations = async (req, res) => {
             if (!msg.sender || !msg.receiver) return;
 
             const otherUser = msg.sender_id === userId ? msg.receiver : msg.sender;
-            const otherUserId = otherUser.id;
+            const bookingId = msg.booking_id;
+            const bookingTitle = msg.bookings?.services?.title || 'General Inquiry';
 
-            if (!conversationsMap.has(otherUserId)) {
-                conversationsMap.set(otherUserId, {
-                    id: otherUser.id,
+            // Unique key: UserID_BookingID (or just UserID if no booking)
+            const key = `${otherUser.id}_${bookingId || 'general'}`;
+
+            if (!conversationsMap.has(key)) {
+                conversationsMap.set(key, {
+                    key: key,
+                    other_user_id: otherUser.id,
                     username: otherUser.username,
                     profile_picture: otherUser.profile_picture,
                     last_message: msg.content,
-                    created_at: msg.created_at
+                    created_at: msg.created_at,
+                    booking_id: bookingId,
+                    booking_title: bookingTitle
                 });
             }
         });
@@ -106,12 +114,27 @@ const getMessages = async (req, res) => {
     try {
         const userId = req.user.id;
         const otherUserId = req.params.userId;
+        const bookingId = req.query.bookingId;
 
-        const { data: messages, error } = await supabase
+        let query = supabase
             .from('messages')
             .select('*')
             .or(`and(sender_id.eq.${userId},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${userId})`)
             .order('created_at', { ascending: true });
+
+        if (bookingId && bookingId !== 'undefined' && bookingId !== 'null') {
+            query = query.eq('booking_id', bookingId);
+        } else {
+            // If no booking ID, maybe we only want general messages? 
+            // Or maybe we want all messages between users?
+            // For now, if booking_id is null in DB, it matches.
+            // But existing logic was "all messages". 
+            // To separate strict "General" vs "Booking", we should enforce it.
+            // Let's assume if bookingId is NOT provided, we filter for booking_id IS NULL to keep them separate.
+            query = query.is('booking_id', null);
+        }
+
+        const { data: messages, error } = await query;
 
         if (error) throw error;
 

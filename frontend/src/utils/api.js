@@ -141,9 +141,13 @@ export const getConversations = async () => {
     return res.json();
 };
 
-export const getMessages = async (userId) => {
+export const getMessages = async (userId, bookingId) => {
     const token = localStorage.getItem('token');
-    const res = await fetch(`${API_URL}/messages/${userId}`, {
+    let url = `${API_URL}/messages/${userId}`;
+    if (bookingId) {
+        url += `?bookingId=${bookingId}`;
+    }
+    const res = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     return res.json();
