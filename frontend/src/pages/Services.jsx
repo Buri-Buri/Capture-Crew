@@ -17,6 +17,11 @@ const Services = () => {
     const searchParams = new URLSearchParams(location.search);
     const searchTerm = searchParams.get('search') || '';
 
+    // Get user role
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const isSeller = user?.role === 'seller';
+
     useEffect(() => {
         fetchServices();
     }, [searchTerm, category, locationFilter]); // Re-fetch when any filter changes
@@ -69,27 +74,30 @@ const Services = () => {
             <h2 className="section-title">Find Professionals</h2>
 
             {/* Filters Section */}
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-                <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #334155', background: '#1e293b', color: 'white', minWidth: '200px' }}
-                >
-                    <option value="">All Categories</option>
-                    <option value="Photography">Photography</option>
-                    <option value="Videography">Videography</option>
-                    <option value="Event Planning">Event Planning</option>
-                    <option value="Decoration">Decoration</option>
-                </select>
+            {/* Filters Section - Only visible to non-sellers */}
+            {!isSeller && (
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                    <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #334155', background: '#1e293b', color: 'white', minWidth: '200px' }}
+                    >
+                        <option value="">All Categories</option>
+                        <option value="Photography">Photography</option>
+                        <option value="Videography">Videography</option>
+                        <option value="Event Planning">Event Planning</option>
+                        <option value="Decoration">Decoration</option>
+                    </select>
 
-                <input
-                    type="text"
-                    placeholder="Filter by Location (e.g. Dhaka)"
-                    value={locationFilter}
-                    onChange={(e) => setLocationFilter(e.target.value)}
-                    style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #334155', background: '#1e293b', color: 'white', minWidth: '200px' }}
-                />
-            </div>
+                    <input
+                        type="text"
+                        placeholder="Filter by Location (e.g. Dhaka)"
+                        value={locationFilter}
+                        onChange={(e) => setLocationFilter(e.target.value)}
+                        style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #334155', background: '#1e293b', color: 'white', minWidth: '200px' }}
+                    />
+                </div>
+            )}
 
             <div className="grid">
                 {services.map((service) => (
