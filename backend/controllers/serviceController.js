@@ -125,6 +125,15 @@ const getAllServices = async (req, res) => {
             query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`);
         }
 
+        if (req.query.category) {
+            query = query.eq('category', req.query.category);
+        }
+
+        if (req.query.location) {
+            // Using ilike for case-insensitive partial match on location
+            query = query.ilike('location', `%${req.query.location}%`);
+        }
+
         const { data: services, error: servicesError } = await query;
 
         if (servicesError) throw servicesError;

@@ -50,10 +50,14 @@ export const getMyServices = async () => {
     return response.json();
 };
 
-export const getAllServices = async (search = '') => {
-    const url = search
-        ? `${API_URL}/services?search=${encodeURIComponent(search)}`
-        : `${API_URL}/services`;
+export const getAllServices = async (options = {}) => {
+    const queryParams = new URLSearchParams();
+
+    if (options.search) queryParams.append('search', options.search);
+    if (options.category) queryParams.append('category', options.category);
+    if (options.location) queryParams.append('location', options.location);
+
+    const url = `${API_URL}/services?${queryParams.toString()}`;
     const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },

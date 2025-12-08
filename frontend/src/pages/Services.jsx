@@ -9,17 +9,25 @@ const Services = () => {
     const [selectedServiceId, setSelectedServiceId] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    // Filter states
+    const [category, setCategory] = useState('');
+    const [locationFilter, setLocationFilter] = useState('');
+
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
-    const searchTerm = searchParams.get('search');
+    const searchTerm = searchParams.get('search') || '';
 
     useEffect(() => {
-        fetchServices(searchTerm);
-    }, [searchTerm]);
+        fetchServices();
+    }, [searchTerm, category, locationFilter]); // Re-fetch when any filter changes
 
-    const fetchServices = async (search = '') => {
+    const fetchServices = async () => {
         try {
-            const data = await getAllServices(search);
+            const data = await getAllServices({
+                search: searchTerm,
+                category,
+                location: locationFilter
+            });
             if (Array.isArray(data)) {
                 setServices(data);
             }
@@ -59,6 +67,30 @@ const Services = () => {
     return (
         <div className="container" style={{ paddingTop: '100px' }}>
             <h2 className="section-title">Find Professionals</h2>
+
+            {/* Filters Section */}
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #334155', background: '#1e293b', color: 'white', minWidth: '200px' }}
+                >
+                    <option value="">All Categories</option>
+                    <option value="Photography">Photography</option>
+                    <option value="Videography">Videography</option>
+                    <option value="Event Planning">Event Planning</option>
+                    <option value="Decoration">Decoration</option>
+                </select>
+
+                <input
+                    type="text"
+                    placeholder="Filter by Location (e.g. Dhaka)"
+                    value={locationFilter}
+                    onChange={(e) => setLocationFilter(e.target.value)}
+                    style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #334155', background: '#1e293b', color: 'white', minWidth: '200px' }}
+                />
+            </div>
+
             <div className="grid">
                 {services.map((service) => (
                     <div
@@ -90,6 +122,7 @@ const Services = () => {
                             <div style={{ marginTop: '4px', fontSize: '0.9rem', color: '#94a3b8' }}>No reviews yet</div>
                         )}
                         <p style={{ marginTop: '0.5rem' }}>{service.description}</p>
+                        {service.location && <p style={{ marginTop: '0.25rem', fontSize: '0.85rem', color: '#64748b' }}>📍 {service.location}</p>}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
                             <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#6366f1' }}>৳{service.price}</span>
                             {(() => {
@@ -120,7 +153,7 @@ const Services = () => {
                 ))}
             </div>
             {services.length === 0 && (
-                <p style={{ textAlign: 'center', color: '#94a3b8', marginTop: '2rem' }}>No services found. Check back later!</p>
+                <p style={{ textAlign: 'center', color: '#94a3b8', marginTop: '2rem' }}>No services found matching your criteria.</p>
             )}
 
             <BookingModal
