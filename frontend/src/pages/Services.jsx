@@ -80,6 +80,15 @@ const Services = () => {
                         )}
                         <h3>{service.title}</h3>
                         <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{service.category} • by {service.seller_name}</p>
+                        {service.total_reviews > 0 ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px', fontSize: '0.9rem' }}>
+                                <span style={{ color: '#fbbf24' }}>★</span>
+                                <span style={{ fontWeight: 'bold' }}>{service.average_rating}</span>
+                                <span style={{ color: '#94a3b8' }}>({service.total_reviews})</span>
+                            </div>
+                        ) : (
+                            <div style={{ marginTop: '4px', fontSize: '0.9rem', color: '#94a3b8' }}>No reviews yet</div>
+                        )}
                         <p style={{ marginTop: '0.5rem' }}>{service.description}</p>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
                             <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#6366f1' }}>৳{service.price}</span>
