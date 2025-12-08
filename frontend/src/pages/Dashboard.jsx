@@ -317,7 +317,14 @@ const Dashboard = () => {
                                     <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                         <button onClick={() => handleStatusUpdate(booking.id, 'accepted')} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Accept</button>
                                         <button onClick={() => handleStatusUpdate(booking.id, 'rejected')} className="btn btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', borderColor: '#ef4444', color: '#ef4444' }}>Reject</button>
-                                        <button onClick={() => navigate('/messages', { state: { sellerId: booking.customer_id, sellerName: booking.customer_name } })} className="btn btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Message Buyer</button>
+                                        <button onClick={() => navigate('/messages', {
+                                            state: {
+                                                sellerId: booking.customer_id,
+                                                sellerName: booking.customer_name,
+                                                bookingId: booking.id,
+                                                serviceTitle: booking.service_title
+                                            }
+                                        })} className="btn btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Message Buyer</button>
                                     </div>
                                 )}
 
@@ -329,7 +336,14 @@ const Dashboard = () => {
                                         {booking.is_completed && booking.payment_status === 'pending' && (
                                             <button onClick={() => handlePayment(booking.id, 'paid')} className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', background: '#f59e0b', borderColor: '#f59e0b' }}>Mark Paid</button>
                                         )}
-                                        <button onClick={() => navigate('/messages', { state: { sellerId: booking.customer_id, sellerName: booking.customer_name } })} className="btn btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Message Buyer</button>
+                                        <button onClick={() => navigate('/messages', {
+                                            state: {
+                                                sellerId: booking.customer_id,
+                                                sellerName: booking.customer_name,
+                                                bookingId: booking.id,
+                                                serviceTitle: booking.service_title
+                                            }
+                                        })} className="btn btn-outline" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Message Buyer</button>
                                     </div>
                                 )}
                             </div>

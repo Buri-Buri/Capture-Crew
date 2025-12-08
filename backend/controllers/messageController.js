@@ -35,13 +35,21 @@ const sendMessage = async (req, res) => {
         if (error) throw error;
 
         // Create notification for receiver
+        const { data: senderProfile } = await supabase
+            .from('users')
+            .select('username')
+            .eq('id', sender_id)
+            .single();
+
+        const senderName = senderProfile ? senderProfile.username : 'someone';
+
         await supabase
             .from('notifications')
             .insert([
                 {
                     user_id: receiver_id,
                     type: 'message',
-                    content: `New message from user ${sender_id}`, // Ideally fetch username, but ID is faster for now
+                    content: `New message from ${senderName}`,
                     related_id: sender_id, // Link to sender so we can navigate to conversation
                     is_read: false
                 }
