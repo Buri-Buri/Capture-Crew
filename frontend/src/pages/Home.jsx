@@ -32,25 +32,51 @@ const Home = () => {
     return (
         <div className="home">
             {/* Hero Section */}
+            {/* Hero Section */}
             <section className="hero">
                 <div className="container">
-                    <div style={{ display: 'inline-block', padding: '0.5rem 1rem', background: 'var(--secondary)', color: 'var(--secondary-foreground)', borderRadius: '999px', fontSize: '0.875rem', fontWeight: '600', marginBottom: '1.5rem' }}>
-                        Your Event, Our Professionals
-                    </div>
-                    <h1>Find Perfect <br /> Photographers & Event Planners</h1>
-                    <p>Connect with trusted professionals for your weddings, birthdays, corporate events, and more. Browse portfolios, compare prices, and book with confidence.</p>
+                    {(() => {
+                        const userStr = localStorage.getItem('user');
+                        const user = userStr ? JSON.parse(userStr) : null;
+                        const isSeller = user?.role === 'seller';
 
-                    <div className="search-bar" style={{ margin: '0 auto' }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0.75rem', color: 'var(--muted-foreground)' }}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                        <input
-                            type="text"
-                            placeholder="Search for photographers, event planners, or services..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        />
-                        <button onClick={handleSearch} className="btn btn-primary">Search</button>
-                    </div>
+                        if (isSeller) {
+                            return (
+                                <>
+                                    <div style={{ display: 'inline-block', padding: '0.5rem 1rem', background: 'var(--secondary)', color: 'var(--secondary-foreground)', borderRadius: '999px', fontSize: '0.875rem', fontWeight: '600', marginBottom: '1.5rem' }}>
+                                        Welcome Back, {user.username}!
+                                    </div>
+                                    <h1>Manage Your <br /> Professional Services</h1>
+                                    <p>Track your bookings, update your portfolio, and grow your business with CaptureCrew.</p>
+                                    <div style={{ marginTop: '2rem' }}>
+                                        <button onClick={() => navigate('/dashboard')} className="btn btn-primary" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>Go to Dashboard</button>
+                                    </div>
+                                </>
+                            );
+                        }
+
+                        return (
+                            <>
+                                <div style={{ display: 'inline-block', padding: '0.5rem 1rem', background: 'var(--secondary)', color: 'var(--secondary-foreground)', borderRadius: '999px', fontSize: '0.875rem', fontWeight: '600', marginBottom: '1.5rem' }}>
+                                    Your Event, Our Professionals
+                                </div>
+                                <h1>Find Perfect <br /> Photographers & Event Planners</h1>
+                                <p>Connect with trusted professionals for your weddings, birthdays, corporate events, and more. Browse portfolios, compare prices, and book with confidence.</p>
+
+                                <div className="search-bar" style={{ margin: '0 auto' }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0.75rem', color: 'var(--muted-foreground)' }}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                                    <input
+                                        type="text"
+                                        placeholder="Search for photographers, event planners, or services..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    />
+                                    <button onClick={handleSearch} className="btn btn-primary">Search</button>
+                                </div>
+                            </>
+                        );
+                    })()}
 
                     <div className="stats">
                         <div className="stat-item">
