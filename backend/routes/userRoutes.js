@@ -16,4 +16,7 @@ router.put('/profile', verifyToken, (req, res, next) => {
     });
 }, userController.updateUserProfile);
 
+// Public route to get any user's profile by ID
+router.get('/:id', userController.getPublicUserProfile);
+
 module.exports = router;

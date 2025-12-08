@@ -182,6 +182,14 @@ const getAllServices = async (req, res) => {
             formattedServices.push(serviceObj);
         }
 
+        // Sort by average_rating (descending), then total_reviews (descending)
+        formattedServices.sort((a, b) => {
+            if (b.average_rating !== a.average_rating) {
+                return b.average_rating - a.average_rating;
+            }
+            return b.total_reviews - a.total_reviews;
+        });
+
         res.json(formattedServices);
     } catch (error) {
         console.error('Get All Services Error:', error);

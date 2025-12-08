@@ -100,7 +100,14 @@ const ServiceDetails = () => {
                                         </div>
                                     )}
                                 </div>
-                                <span>{service.seller_name}</span>
+                                <span
+                                    onClick={() => navigate(`/seller/${service.seller_id}`)}
+                                    style={{ fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline', color: 'var(--foreground)' }}
+                                    onMouseEnter={(e) => e.target.style.color = 'var(--primary)'}
+                                    onMouseLeave={(e) => e.target.style.color = 'var(--foreground)'}
+                                >
+                                    {service.seller_name}
+                                </span>
                                 <span>•</span>
                                 <span>{service.category}</span>
                                 <span>•</span>

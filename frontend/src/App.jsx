@@ -12,6 +12,7 @@ import Messages from './pages/Messages';
 import ProfileSettings from './pages/ProfileSettings';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
+import PublicProfile from './pages/PublicProfile';
 
 
 
@@ -27,6 +28,7 @@ function App() {
             <Navbar />
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/seller/:id" element={<PublicProfile />} />
               <Route path="/services" element={<Services />} />
               <Route path="/service/:id" element={<ServiceDetails />} />
               <Route path="/login" element={<Login />} />

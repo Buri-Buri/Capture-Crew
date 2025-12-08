@@ -181,6 +181,11 @@ export const getUserProfile = async () => {
     return response.json();
 };
 
+export const getPublicProfile = async (userId) => {
+    const response = await fetch(`${API_URL}/users/${userId}`);
+    return response.json();
+};
+
 export const updateUserProfile = async (userData) => {
     const token = localStorage.getItem('token');
     const response = await fetch(`${API_URL}/users/profile`, {

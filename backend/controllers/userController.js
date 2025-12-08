@@ -91,4 +91,26 @@ const updateUserProfile = async (req, res) => {
     }
 };
 
-module.exports = { uploadProfilePicture, getUserProfile, updateUserProfile };
+const getPublicUserProfile = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { data: user, error } = await supabase
+            .from('users')
+            .select('id, username, role, profile_picture, bio, experience, created_at')
+            .eq('id', id)
+            .single();
+
+        if (error || !user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Return only public info
+        res.json(user);
+    } catch (error) {
+        console.error('Error fetching public profile:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { uploadProfilePicture, getUserProfile, updateUserProfile, getPublicUserProfile };
