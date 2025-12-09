@@ -24,18 +24,14 @@ const createBooking = async (req, res) => {
         if (error) throw error;
 
         // Notify seller
-        // First get service details to know the seller (already have it? No, need to fetch or trust input? 
-        // Wait, createBooking takes service_id. We need to find the seller_id from service_id.
-        // The original code didn't fetch seller_id explicitly to return it, but we need it for notification.
-
-        const { data: serviceData } = await supabase
+        const { data: serviceData, error: serviceError } = await supabase
             .from('services')
             .select('seller_id, title')
             .eq('id', service_id)
             .single();
 
-        if (serviceData) {
-            await supabase
+        if (serviceData && !serviceError) {
+            const { error: notifyError } = await supabase
                 .from('notifications')
                 .insert([
                     {
@@ -46,6 +42,12 @@ const createBooking = async (req, res) => {
                         is_read: false
                     }
                 ]);
+
+            if (notifyError) {
+                console.error('Error creating notification:', notifyError);
+            }
+        } else if (serviceError) {
+            console.error('Error fetching service for notification:', serviceError);
         }
 
         res.status(201).json({ message: 'Booking created successfully', bookingId: data.id });
