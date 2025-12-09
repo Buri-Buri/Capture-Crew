@@ -58,7 +58,7 @@ const ServiceDetails = () => {
                 setShowBooking(false);
                 navigate('/customer-dashboard');
             } else {
-                showToast(JSON.stringify(res).slice(0, 100) || 'Empty response', 'error');
+                showToast(res.message || 'Failed to book service', 'error');
             }
         } catch (error) {
             console.error('Error booking service:', error);
