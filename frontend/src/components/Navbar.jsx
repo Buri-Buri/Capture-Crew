@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../utils/api';
 import logo from '../assets/logo.png';
 
 const Navbar = () => {
@@ -39,7 +40,7 @@ const Navbar = () => {
             const token = localStorage.getItem('token');
             if (!token) return;
 
-            const response = await fetch('http://localhost:5000/api/notifications', {
+            const response = await fetch(`${API_URL}/notifications`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -76,7 +77,7 @@ const Navbar = () => {
         try {
             const token = localStorage.getItem('token');
             if (!notification.is_read) {
-                await fetch(`http://localhost:5000/api/notifications/${notification.id}/read`, {
+                await fetch(`${API_URL}/notifications/${notification.id}/read`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`
