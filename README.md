@@ -25,11 +25,47 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
 
 ## Tech Stack
 
--   **Frontend**: React, Vite, React Router, Vanilla CSS (OKLCH variables).
--   **Backend**: Node.js, Express.js.
--   **Database**: Supabase (PostgreSQL).
--   **Authentication**: Custom JWT with Supabase.
--   **File Storage**: Supabase Storage (for profile pictures and portfolio images).
+-   **Frontend**:
+    -   React (v19)
+    -   Vite
+    -   React Router (v7)
+    -   Vanilla CSS (OKLCH variables)
+-   **Backend**:
+    -   Node.js
+    -   Express.js
+    -   Supabase Client (@supabase/supabase-js)
+-   **Database**: Supabase (PostgreSQL)
+-   **Authentication**: Custom JWT with Supabase Auth
+-   **File Storage**: Supabase Storage (buckets: `profile-pictures`, `service-images`)
+
+## Project Structure
+
+```
+Capture-Crew/
+├── backend/                # Node.js/Express Backend
+│   ├── config/             # Database configuration
+│   ├── controllers/        # Request handlers (auth, booking, messsage, etc.)
+│   ├── middleware/         # Auth and upload middleware
+│   ├── models/             # Database models/queries
+│   ├── routes/             # API routes definition
+│   ├── scripts/            # Utility scripts (e.g. database setup)
+│   ├── uploads/            # Temporary file upload storage
+│   ├── utils/              # Helper functions
+│   └── server.js           # Entry point
+│
+├── frontend/               # React Frontend
+│   ├── src/
+│   │   ├── assets/         # Static assets
+│   │   ├── components/     # Reusable UI components
+│   │   ├── context/        # React Context (AuthContext)
+│   │   ├── pages/          # Application pages (Home, Login, Dashboard, etc.)
+│   │   ├── utils/          # Utility functions
+│   │   ├── App.jsx         # Main application component
+│   │   └── main.jsx        # Entry point
+│   └── ...
+└── database/               # Database related files
+    └── schema.sql          # Supabase database schema
+```
 
 ## Prerequisites
 
@@ -80,36 +116,27 @@ CaptureCrew is a modern online marketplace connecting users with professional ph
 4.  **Build Command**: `npm install`
 5.  **Start Command**: `node server.js`
 6.  **Root Directory**: `backend`
-7.  **Environment Variables**: Add the same variables as your local `.env` (`SUPABASE_URL`, `SUPABASE_KEY`, `JWT_SECRET`).
+7.  **Environment Variables**: Add the same variables as your local `.env`.
 
-### Frontend (Netlify)
-1.  Create a new site on [Netlify](https://netlify.com) from Git.
+### Frontend (Netlify/Vercel)
+1.  Create a new site from Git.
 2.  **Build Command**: `npm run build`
-3.  **Publish Directory**: `dist`
-4.  **Base Directory**: `frontend`
+3.  **Output Directory**: `dist`
+4.  **Root Directory**: `frontend`
 5.  **Environment Variables**:
-    -   `VITE_API_URL`: Your Render Backend URL (e.g., `https://your-app.onrender.com/api`) - **Don't forget the `/api` suffix!**
+    -   `VITE_API_URL`: Your Backend URL (e.g., `https://your-app.onrender.com/api`)
 
 ## Database Setup
 
-The application uses Supabase. Ensure your Supabase project has the following tables:
+The application uses Supabase. Ensure your Supabase project has the following tables defined in `database/schema.sql`:
 - `users`
 - `services`
 - `bookings`
 - `messages`
+- `notifications`
 - `service_images`
-
-You can find the schema definition in `database/schema.sql`.
-
-## Usage
-
-1.  Open your browser and navigate to `http://localhost:5173`.
-2.  **Sign Up**: Create an account as a "Customer" to book services or a "Seller" to list services.
-3.  **Explore**: Use the search bar or browse categories to find professionals.
-4.  **Book**: Select a service, choose a date, and submit a booking request.
-5.  **Manage**: Sellers can accept/reject bookings from their dashboard.
+- `reviews`
 
 ## License
 
 This project is licensed under the MIT License.
-
